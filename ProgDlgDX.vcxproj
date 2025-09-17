@@ -136,14 +136,6 @@
     <ClCompile Include="ProgDlgDX.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\System\ADT\ADT.vcxproj">
-      <Project>{a054a5cd-c32f-4710-a1fe-6102c6687090}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System\CompSys\CompSys.vcxproj">
-      <Project>{c47ad857-39fc-4a84-80ef-4e37d6c2f2ed}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="ProgDlgDX_x64.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>

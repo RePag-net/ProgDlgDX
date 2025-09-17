@@ -26,6 +26,9 @@ SOFTWARE.
 ******************************************************************************/
 #include "HProgDlgDX.h"
 
+#pragma comment(lib, "CompSys")
+#pragma comment(lib, "ADT")
+
 void __vectorcall RePagPrgDX_Start(void);
 void __vectorcall RePagPrgDX_Ende(void);
 //------------------------------------------------------------------------------------------------------------------------------------------
