@@ -235,32 +235,32 @@ void __vectorcall RePag::DirectX::COElement::WM_Size_Element(HWND hWnd, LPARAM l
 //	}
 //}
 ////-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::Hintergrund_Effekt(RECT* prcZeichnen)
-{
-	if(ucHintergrundeffekt > HGE_HINTERGRUND){
-		if(ucHintergrundeffekt & HGE_BELEUCHTUNG_H) Effekt_Beleuchtung_Horizontal();
-		if(ucHintergrundeffekt & HGE_BELEUCHTUNG_V) Effekt_Beleuchtung_Vertical();
-		if(ucHintergrundeffekt & HGE_RAND_H) Effekt_Rand_Horizontal();
-		if(ucHintergrundeffekt & HGE_RAND_V) Effekt_Rand_Vertical();
-		if(prcZeichnen){
-			RECT rcClient; GetClientRect(hWndElement, &rcClient);
-			if(prcZeichnen->top < rcEffektrand.top) prcZeichnen->top = rcEffektrand.top + 1;
-			if(prcZeichnen->left < rcEffektrand.left) prcZeichnen->left = rcEffektrand.left;
-			if(prcZeichnen->bottom > rcClient.bottom - rcEffektrand.bottom) prcZeichnen->bottom = rcClient.bottom - rcEffektrand.bottom;
-			if(prcZeichnen->right > rcClient.right - rcEffektrand.right) prcZeichnen->right = rcClient.right - rcEffektrand.right;
-		}
-	}
-	if(ucHintergrundeffekt & HGE_HINTERGRUND){
-		if(prcZeichnen) Hintergrund(*prcZeichnen);
-		else{
-			RECT* prcClient = (RECT*)VMBlock(16); GetClientRect(hWndElement, prcClient);
-			prcClient->top += rcEffektrand.top; prcClient->left += rcEffektrand.left;
-			prcClient->bottom -= rcEffektrand.bottom; prcClient->right -= rcEffektrand.right;
-			Hintergrund(*prcClient); VMFrei(prcClient);
-		}
-	}
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
+//void __vectorcall RePag::DirectX::COElement::Hintergrund_Effekt(RECT* prcZeichnen)
+//{
+//	if(ucHintergrundeffekt > HGE_HINTERGRUND){
+//		if(ucHintergrundeffekt & HGE_BELEUCHTUNG_H) Effekt_Beleuchtung_Horizontal();
+//		if(ucHintergrundeffekt & HGE_BELEUCHTUNG_V) Effekt_Beleuchtung_Vertical();
+//		if(ucHintergrundeffekt & HGE_RAND_H) Effekt_Rand_Horizontal();
+//		if(ucHintergrundeffekt & HGE_RAND_V) Effekt_Rand_Vertical();
+//		if(prcZeichnen){
+//			RECT rcClient; GetClientRect(hWndElement, &rcClient);
+//			if(prcZeichnen->top < rcEffektrand.top) prcZeichnen->top = rcEffektrand.top + 1;
+//			if(prcZeichnen->left < rcEffektrand.left) prcZeichnen->left = rcEffektrand.left;
+//			if(prcZeichnen->bottom > rcClient.bottom - rcEffektrand.bottom) prcZeichnen->bottom = rcClient.bottom - rcEffektrand.bottom;
+//			if(prcZeichnen->right > rcClient.right - rcEffektrand.right) prcZeichnen->right = rcClient.right - rcEffektrand.right;
+//		}
+//	}
+//	if(ucHintergrundeffekt & HGE_HINTERGRUND){
+//		if(prcZeichnen) Hintergrund(*prcZeichnen);
+//		else{
+//			RECT* prcClient = (RECT*)VMBlock(16); GetClientRect(hWndElement, prcClient);
+//			prcClient->top += rcEffektrand.top; prcClient->left += rcEffektrand.left;
+//			prcClient->bottom -= rcEffektrand.bottom; prcClient->right -= rcEffektrand.right;
+//			Hintergrund(*prcClient); VMFrei(prcClient);
+//		}
+//	}
+//}
+////-----------------------------------------------------------------------------------------------------------------------------------------
 HWND __vectorcall RePag::DirectX::COElement::HWND_Element(void)
 {
 	return hWndElement;
@@ -408,7 +408,7 @@ void __vectorcall RePag::DirectX::COElement::SetzHintergrund(bool bMitHintergrun
 		else if(!bHintergrund && bMitHintergrund){
 			bHintergrund = bMitHintergrund; RECT rcClient; GetClientRect(hWndElement, &rcClient);
 			WM_Size_Element(hWndElement, MAKELPARAM(rcClient.right, rcClient.bottom));
-			UpdateFenster(nullptr, true, true);
+			//UpdateFenster(nullptr, true, true);
 		}
 		ThreadSicher_Ende();
 	}
@@ -429,17 +429,17 @@ void __vectorcall RePag::DirectX::COElement::Loschen(void)
 	DestroyWindow(hWndElement);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::UpdateFenster(RECT* prcFenster, bool bUpdateHintergrund, bool bUpdateHintergrundeffekt)
-{
-	if(hWndElement){
-		ThreadSicher_Anfang();
-		if(bUpdateHintergrundeffekt && hbmBild) Hintergrund_Effekt(prcFenster);
-		if(bUpdateHintergrund && hbmBild) bHintergrund = true;
-		InvalidateRect(hWndElement, prcFenster, false); UpdateWindow(hWndElement);
-		ThreadSicher_Ende();
-	}
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
+//void __vectorcall RePag::DirectX::COElement::UpdateFenster(RECT* prcFenster, bool bUpdateHintergrund, bool bUpdateHintergrundeffekt)
+//{
+//	if(hWndElement){
+//		ThreadSicher_Anfang();
+//		if(bUpdateHintergrundeffekt && hbmBild) Hintergrund_Effekt(prcFenster);
+//		if(bUpdateHintergrund && hbmBild) bHintergrund = true;
+//		InvalidateRect(hWndElement, prcFenster, false); UpdateWindow(hWndElement);
+//		ThreadSicher_Ende();
+//	}
+//}
+////-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::BackroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ unsigned char ucAlpha)
 {
 	ThreadSicher_Anfang();
@@ -487,8 +487,8 @@ void __vectorcall RePag::DirectX::COElement::Effekt_Timer(bool bStarten, unsigne
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::Effekt_Beleuchtung_Vertical(void)
-{
+//void __vectorcall RePag::DirectX::COElement::Effekt_Beleuchtung_Vertical(void)
+//{
 //	DIBSECTION stDIBSection; GetObject(hbmBild, sizeof(DIBSECTION), &stDIBSection);
 //
 //	COLORREF crFarbe, crHintergrundfarbe; long lx, ly, lz, lPixel, lRand = ((stDIBSection.dsBmih.biWidth * stDIBSection.dsBmih.biBitCount + 31) & ~31) >> 3;
@@ -520,7 +520,7 @@ void __vectorcall RePag::DirectX::COElement::Effekt_Beleuchtung_Vertical(void)
 //			((BYTE*)stDIBSection.dsBm.bmBits)[++lPixel] = GetRValue(crFarbe);
 //		}
 //	}
-}
+//}
 //-----------------------------------------------------------------------------------------------------------------------------------------
 inline void __vectorcall RePag::DirectX::COElement::ThreadSicher_Anfang(void)
 {

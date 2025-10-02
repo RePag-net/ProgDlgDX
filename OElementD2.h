@@ -58,12 +58,12 @@ namespace RePag
 			bool bHintergrund;
 			unsigned char ucHintergrundeffekt;
 			D2D1_COLOR_F stBackColorEffect;
-			void __vectorcall Hintergrund(RECT& rcZeichnen);
-			void __vectorcall Hintergrund_Effekt(RECT* prcZeichnen);
-			void __vectorcall Effekt_Beleuchtung_Horizontal(void);
-			void __vectorcall Effekt_Beleuchtung_Vertical(void);
-			void __vectorcall Effekt_Rand_Horizontal(void);
-			void __vectorcall Effekt_Rand_Vertical(void);
+			//void __vectorcall Hintergrund(RECT& rcZeichnen);
+			//void __vectorcall Hintergrund_Effekt(RECT* prcZeichnen);
+			//void __vectorcall Effekt_Beleuchtung_Horizontal(void);
+			//void __vectorcall Effekt_Beleuchtung_Vertical(void);
+			//void __vectorcall Effekt_Rand_Horizontal(void);
+			//void __vectorcall Effekt_Rand_Vertical(void);
 
 		protected:
 			VMEMORY vmSpeicher;
@@ -117,7 +117,7 @@ namespace RePag
 			void __vectorcall Hintergrundeffektfarbe(unsigned char ucRot, unsigned char ucGrun, unsigned char ucBlau, unsigned char ucAlpha);
 			void __vectorcall Hintergrundeffektrand(long lOben, long lUnten, long lLinks, long lRechts);
 			void __vectorcall Effekt_Timer(bool bStarten, unsigned long ulInterval_msek, void CALLBACK fnEffekt_Timer(COElement*, bool bTimerOrWaitFired));
-			void __vectorcall UpdateFenster(RECT* prcFenster, bool bUpdateHintergrund, bool bUpdateHintergrundeffekt);
+			//void __vectorcall UpdateFenster(RECT* prcFenster, bool bUpdateHintergrund, bool bUpdateHintergrundeffekt);
 			void __vectorcall SetzHintergrund(bool bMitHintergrund);
 			void __vectorcall SetzVerfugbar(bool bVerfugbar);
 			bool __vectorcall Verfugbar(void);

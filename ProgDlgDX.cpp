@@ -45,8 +45,8 @@ char pcRePag_GraphicGroup[] = "RePag_GrafikGruppe";
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePagPrgDX_Start(void)
 {
-  SYSTEM_INFO stSystem_Info; GetSystemInfo(&stSystem_Info);
-  CPUID(stSystem_Info);
+  //SYSTEM_INFO stSystem_Info; GetSystemInfo(&stSystem_Info);
+  //CPUID(stSystem_Info);
 
   ULONG ulMinimumWorkingSetSize, ulMaximumWorkingSetSize;
   HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, GetCurrentProcessId());

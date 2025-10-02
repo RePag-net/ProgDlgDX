@@ -67,7 +67,7 @@ extern VMEMORY vmDialog;
 extern HANDLE htqTimerQueue;
 extern char pcRePag_GraphicGroup[];
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall CPUID(SYSTEM_INFO& stSystem_Info);
+//void __vectorcall CPUID(SYSTEM_INFO& stSystem_Info);
 void __vectorcall LoschWndKlasse(ATOM atWndKlasse);
 //-------------------------------------------------------------------------------------------------------------------------------------------
 namespace RePag

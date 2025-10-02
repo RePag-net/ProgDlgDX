@@ -58,14 +58,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="ProgDlgDX_x64.asm">
-      <Filter>Quelldateien</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ProgDlgDX_x86.asm">
-      <Filter>Quelldateien</Filter>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="ProgDlgDX.rc">
       <Filter>Ressourcendateien</Filter>
     </ResourceCompile>
