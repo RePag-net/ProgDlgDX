@@ -56,9 +56,9 @@ void __vectorcall RePag::DirectX::COElement::COElementV(_In_ const VMEMORY vmSpe
 	hWndElement = nullptr;
 	hbmBild = nullptr;
 	htEffekt_Timer = nullptr;
-	stBackColor.r = stBackColor.b = stBackColor.g = stBackColor.a = 1.0f;
+	crfBackground = D2D1::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
 	ucHintergrundeffekt = HGE_HINTERGRUND;
-	stBackColorEffect.r = stBackColorEffect.b = stBackColorEffect.g = stBackColorEffect.a = 0.0f;
+	crfBackgroundEffect = D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f);
 	rcEffektrand.left = rcEffektrand.right = rcEffektrand.top = rcEffektrand.bottom = 0;
 	ucRahmenbreite = 0;
 
@@ -175,7 +175,7 @@ void __vectorcall RePag::DirectX::COElement::WM_Create_Element(HWND hWnd)
 	dxgiPresent.DirtyRectsCount = 1; dxgiPresent.pDirtyRects = &rclDirty;
 	dxgiPresent.pScrollOffset = nullptr; dxgiPresent.pScrollRect = nullptr;
 
-	ifD2D1Context6->CreateSolidColorBrush(stBackColor, &ifBackColor);	ifBackColor->SetColor(stBackColor);
+	ifD2D1Context6->CreateSolidColorBrush(crfBackground, &ifBackColor);	ifBackColor->SetColor(crfBackground);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::WM_Size_Element(HWND hWnd, LPARAM lParam)
@@ -440,14 +440,18 @@ void __vectorcall RePag::DirectX::COElement::Loschen(void)
 //	}
 //}
 ////-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::BackroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ unsigned char ucAlpha)
+void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ unsigned char ucAlpha)
 {
 	ThreadSicher_Anfang();
-	stBackColor.r = static_cast<float>(ucRot) / 255.0f; 
-	stBackColor.g = static_cast<float>(ucGrun) / 255.0f;
-	stBackColor.b = static_cast<float>(ucBlau) / 255.0f;
-	stBackColor.a = static_cast<float>(ucAlpha) / 255.0f;
-	if(ifBackColor) ifBackColor->SetColor(stBackColor);
+	crfBackground =	D2D1::ColorF(RGB(ucBlau, ucGrun, ucRot), ucAlpha);
+	if(ifBackColor) ifBackColor->SetColor(crfBackground);
+	ThreadSicher_Ende();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COElement::GetBackgroundColor(_In_ D2D1_COLOR_F& crfBackgroundA)
+{
+	ThreadSicher_Anfang();
+	crfBackgroundA = crfBackground;
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -461,11 +465,8 @@ void __vectorcall RePag::DirectX::COElement::Hintergrundeffekt(unsigned char ucE
 void __vectorcall RePag::DirectX::COElement::Hintergrundeffektfarbe(unsigned char ucRot, unsigned char ucGrun, unsigned char ucBlau, unsigned char ucAlpha)
 {
 	ThreadSicher_Anfang();
-	stBackColorEffect.r = static_cast<float>(ucRot) / 255.0f;
-	stBackColorEffect.g = static_cast<float>(ucGrun) / 255.0f;
-	stBackColorEffect.b = static_cast<float>(ucBlau) / 255.0f;
-	stBackColorEffect.a = static_cast<float>(ucAlpha) / 255.0f;
-	if(ifBackColor) ifBackColor->SetColor(stBackColor);
+	crfBackgroundEffect = D2D1::ColorF(RGB(ucBlau, ucGrun, ucRot), ucAlpha);
+	if(ifBackColor) ifBackColor->SetColor(crfBackgroundEffect);
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------

@@ -57,7 +57,7 @@ namespace RePag
 			HBITMAP hbmBild;
 			bool bHintergrund;
 			unsigned char ucHintergrundeffekt;
-			D2D1_COLOR_F stBackColorEffect;
+			D2D1_COLOR_F crfBackgroundEffect;
 			//void __vectorcall Hintergrund(RECT& rcZeichnen);
 			//void __vectorcall Hintergrund_Effekt(RECT* prcZeichnen);
 			//void __vectorcall Effekt_Beleuchtung_Horizontal(void);
@@ -72,7 +72,7 @@ namespace RePag
 			long lHohe;
 			long lBreite;
 			POINT ptPosition;
-			D2D1_COLOR_F stBackColor;
+			D2D1_COLOR_F crfBackground;
 			ID2D1SolidColorBrush* ifBackColor;
 			RECT rclDirty;
 			DXGI_PRESENT_PARAMETERS dxgiPresent;
@@ -112,7 +112,8 @@ namespace RePag
 			void __vectorcall NeueFensterBreite(long lBreiteA);
 			void __vectorcall AndernFensterGrosse(long lHoheA, long lBreiteA);
 			void __vectorcall AndernFensterPosition(long lPos_x, long lPos_y);
-			void __vectorcall BackroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ unsigned char ucAlpha);
+			void __vectorcall SetBackgroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ unsigned char ucAlpha);
+			void __vectorcall GetBackgroundColor(_In_ D2D1_COLOR_F& crfBackgroundA);
 			void __vectorcall Hintergrundeffekt(unsigned char ucEffekt);
 			void __vectorcall Hintergrundeffektfarbe(unsigned char ucRot, unsigned char ucGrun, unsigned char ucBlau, unsigned char ucAlpha);
 			void __vectorcall Hintergrundeffektrand(long lOben, long lUnten, long lLinks, long lRechts);

@@ -191,7 +191,7 @@ VMEMORY __vectorcall RePag::DirectX::CODialog::COFreiV(void)
 void __vectorcall RePag::DirectX::CODialog::WM_Create(void)
 {
 	ifD2D1Context6->BeginDraw();
-	ifD2D1Context6->Clear(stBackColor);
+	ifD2D1Context6->Clear(crfBackground);
 	ifD2D1Context6->EndDraw();
 	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
 }
