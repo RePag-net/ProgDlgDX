@@ -248,7 +248,7 @@ void __vectorcall RePag::DirectX::CODialog::FensterTitel(const char* pcFensterTi
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::ErstellFenster(HWND hWndHaupt, long lHoheA, long lBreiteA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::CODialog::ErstellFenster(HWND hWndHaupt, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
 	if(vstFensterBau){
 		vstFensterBau->wndKlasse.lpszClassName = vstFensterBau->asName.c_Str();
@@ -258,15 +258,15 @@ void __vectorcall RePag::DirectX::CODialog::ErstellFenster(HWND hWndHaupt, long 
 				vstFensterBau->wndKlasse.lpszClassName = vstFensterBau->asName.c_Str();
 			}
 		}
-		lHohe = lHoheA; lBreite = lBreiteA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
+		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
 		hWndElement = CreateWindowEx(vstFensterBau->dwErweitertStil, vstFensterBau->asName.c_Str(), vstFensterBau->asName.c_Str(), vstFensterBau->dwFensterStil,
-																 ptPosition.x, ptPosition.y, lBreite, lHohe, hWndHaupt, nullptr, hInstance, this);
+																 ptPosition.x, ptPosition.y, lWidth, lHeight, hWndHaupt, nullptr, hInstance, this);
 
 		if(!hWndErstes && !hWndHaupt) hWndErstes = hWndElement;
 		if(hWndElement){
 			SetWindowText(hWndElement, vstFensterBau->vbTitel); SetWindowLongPtr(hWndElement, GWLP_USERDATA, (LONG_PTR)this);
-			RECT rcClient; GetClientRect(hWndElement, &rcClient); lBreite = rcClient.right; lHohe = rcClient.bottom;
+			RECT rcClient; GetClientRect(hWndElement, &rcClient); lWidth = rcClient.right; lHeight = rcClient.bottom;
 			VMFrei(vstFensterBau->vbTitel); vstFensterBau->asName.~COStringA(); VMFrei(vstFensterBau); vstFensterBau = nullptr;
 		}
 	}
@@ -283,11 +283,11 @@ long __vectorcall RePag::DirectX::CODialog::SetzSichtbar(bool bSichtbar, unsigne
 			GetWindowRect(GetParent(hWndElement), &rcRect);
 			ptDialog.x = rcRect.left; ptDialog.y = rcRect.top;
 			if(ucAusrichtung & DLG_LINKS) ptDialog.x = rcRect.left;
-			if(ucAusrichtung & DLG_RECHTS) ptDialog.x = rcRect.right - Breite(lTemp);
+			if(ucAusrichtung & DLG_RECHTS) ptDialog.x = rcRect.right - Width(lTemp);
 			if(ucAusrichtung & DLG_OBEN) ptDialog.y = rcRect.top;
-			if(ucAusrichtung & DLG_UNTEN) ptDialog.y = rcRect.bottom - Hohe(lTemp);
-			if(ucAusrichtung & DLG_MITTEVERTICAL) ptDialog.x = rcRect.left + (rcRect.right - rcRect.left) / 2 - Breite(lTemp) / 2;
-			if(ucAusrichtung & DLG_MITTEHORIZONTAL) ptDialog.y = rcRect.top + (rcRect.bottom - rcRect.top) / 2 - Hohe(lTemp) / 2;
+			if(ucAusrichtung & DLG_UNTEN) ptDialog.y = rcRect.bottom - Height(lTemp);
+			if(ucAusrichtung & DLG_MITTEVERTICAL) ptDialog.x = rcRect.left + (rcRect.right - rcRect.left) / 2 - Width(lTemp) / 2;
+			if(ucAusrichtung & DLG_MITTEHORIZONTAL) ptDialog.y = rcRect.top + (rcRect.bottom - rcRect.top) / 2 - Height(lTemp) / 2;
 			NeueFensterPosition(ptDialog);
 		}
 

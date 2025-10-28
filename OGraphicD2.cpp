@@ -60,19 +60,19 @@ void __vectorcall RePag::DirectX::COGraphic::ErweitertStil(DWORD dwErweitertStil
 	if(vstFensterBau) vstFensterBau->dwErweitertStil = dwErweitertStilA | WS_EX_NOPARENTNOTIFY;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphic::ErstellFenster(HWND hWndHaupt, long lHoheA, long lBreiteA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::COGraphic::ErstellFenster(HWND hWndHaupt, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
 	if(vstFensterBau){
 		while(FindWindowEx(hWndHaupt, nullptr, nullptr, vstFensterBau->asFensterName.c_Str())) vstFensterBau->asFensterName += "A";
 
-		lHohe = lHoheA; lBreite = lBreiteA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
+		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
 		hWndElement = CreateWindowEx(vstFensterBau->dwErweitertStil, vstFensterBau->vbKlassenName, vstFensterBau->asFensterName.c_Str(), vstFensterBau->dwFensterStil,
-																 ptPosition.x, ptPosition.y, lBreite, lHohe, hWndHaupt, reinterpret_cast<HMENU>(static_cast<LONG_PTR>(vstFensterBau->uiIDElement)), hInstance, this);
+																 ptPosition.x, ptPosition.y, lWidth, lHeight, hWndHaupt, reinterpret_cast<HMENU>(static_cast<LONG_PTR>(vstFensterBau->uiIDElement)), hInstance, this);
 
 		if(hWndElement){
 			SetWindowLongPtr(hWndElement, GWLP_USERDATA, (LONG_PTR)this);
-			RECT rcClient; GetClientRect(hWndElement, &rcClient);	lBreite = rcClient.right; lHohe = rcClient.bottom;
+			RECT rcClient; GetClientRect(hWndElement, &rcClient);	lWidth = rcClient.right; lHeight = rcClient.bottom;
 			VMFrei(vstFensterBau->vbKlassenName); vstFensterBau->asFensterName.~COStringA(); VMFrei(vstFensterBau); vstFensterBau = nullptr;
 		}
 	}

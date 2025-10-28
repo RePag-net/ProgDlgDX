@@ -74,7 +74,7 @@ namespace RePag
 			void(__vectorcall* pfnWM_Paint)(CODialog*, PAINTSTRUCT&);
 			void(__vectorcall* pfnWM_Move)(CODialog*, LPARAM);
 			void(__vectorcall* pfnWM_Command)(HWND, unsigned int, WPARAM, LPARAM);
-			void __vectorcall ErstellFenster(HWND hWndHaupt, long lHoheA, long lBreiteA, long lPos_x, long lPos_y);
+			void __vectorcall ErstellFenster(HWND hWndHaupt, long lHeightA, long lWidthA, long lPos_x, long lPos_y);
 			long __vectorcall SetzSichtbar(bool bSichtbar, unsigned char ucAusrichtung, long lRuckgabeA);
 			void __vectorcall Schliessen(void);
 			LOGFONT lfSchrift;

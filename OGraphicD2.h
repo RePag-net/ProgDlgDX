@@ -54,7 +54,7 @@ namespace RePag
 			VMEMORY __vectorcall COFreiV(void);
 			void __vectorcall FensterStil(DWORD dwFensterStilA);
 			void __vectorcall ErweitertStil(DWORD dwErweitertStilA);
-			void __vectorcall ErstellFenster(HWND hWndHaupt, long lHoheA, long lBreiteA, long lPos_x, long lPos_y);
+			void __vectorcall ErstellFenster(HWND hWndHaupt, long lHeightA, long lWidthA, long lPos_x, long lPos_y);
 			unsigned int __vectorcall IDElement(void);
 			void __vectorcall SetzSichtbar(bool bSichtbar);
 			bool __vectorcall Sichtbar(void);

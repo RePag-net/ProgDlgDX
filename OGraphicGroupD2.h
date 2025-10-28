@@ -47,7 +47,7 @@ namespace RePag
 			void __vectorcall COGraphicGroupV(_In_ const VMEMORY vmSpeicher, _In_ const char* pcFensterName, _In_ unsigned int uiDElementA,
 																				_In_ STDeviceResources* pstDeviceResourcesA);
 			void __vectorcall ErstellFensterInRahmen(COGraphic* pGraphic);
-			void __vectorcall ErstellFensterInGruppe(COGraphic* pGraphic, long lHoheA, long lBreiteA, long lPos_x, long lPos_y);
+			void __vectorcall ErstellFensterInGruppe(COGraphic* pGraphic, long lHolHeightAheA, long lWidthA, long lPos_x, long lPos_y);
 			void(__vectorcall* pfnWM_Paint)(COGraphicGroup*, PAINTSTRUCT&);
 			void(__vectorcall* pfnWM_Command)(HWND, unsigned int, WPARAM, LPARAM);
 			void __vectorcall SetzSichtbar(bool bSichtbar);

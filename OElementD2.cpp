@@ -181,7 +181,7 @@ void __vectorcall RePag::DirectX::COElement::WM_Create_Element(HWND hWnd)
 void __vectorcall RePag::DirectX::COElement::WM_Size_Element(HWND hWnd, LPARAM lParam)
 {
 	ThreadSicher_Anfang();
-	//RECT rcFenster; GetWindowRect(hWnd, &rcFenster); lHohe = rcFenster.bottom - rcFenster.top; lBreite = rcFenster.right - rcFenster.left;
+	//RECT rcFenster; GetWindowRect(hWnd, &rcFenster); lHeight = rcFenster.bottom - rcFenster.top; lWidth = rcFenster.right - rcFenster.left;
 	//if(bHintergrund){
 	//	BITMAPINFOHEADER bmih;
 	//	bmih.biSize = sizeof(BITMAPINFOHEADER);
@@ -271,20 +271,20 @@ HWND __vectorcall RePag::DirectX::COElement::HWND_Haupt(void)
 	return GetParent(hWndElement);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-long& __vectorcall RePag::DirectX::COElement::Breite(long& lBreiteA)
+long& __vectorcall RePag::DirectX::COElement::Width(long& lWidthA)
 {
 	ThreadSicher_Anfang();
-	lBreiteA = lBreite;
+	lWidthA = lWidth;
 	ThreadSicher_Ende();
-	return lBreiteA;
+	return lWidthA;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-long& __vectorcall RePag::DirectX::COElement::Hohe(long& lHoheA)
+long& __vectorcall RePag::DirectX::COElement::Height(long& lHeightA)
 {
 	ThreadSicher_Anfang();
-	lHoheA = lHohe;
+	lHeightA = lHeight;
 	ThreadSicher_Ende();
-	return lHoheA;
+	return lHeightA;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 long& __vectorcall RePag::DirectX::COElement::Pos_X(long& lPos_x)
@@ -316,8 +316,8 @@ RECT& __vectorcall RePag::DirectX::COElement::Fenster(RECT& rcFenster)
 	ThreadSicher_Anfang();
 	rcFenster.left = ptPosition.x;
 	rcFenster.top = ptPosition.y;
-	rcFenster.right = ptPosition.x + lBreite;
-	rcFenster.bottom = ptPosition.y + lHohe;
+	rcFenster.right = ptPosition.x + lWidth;
+	rcFenster.bottom = ptPosition.y + lHeight;
 	ThreadSicher_Ende();
 	return rcFenster;
 }
@@ -327,7 +327,7 @@ void __vectorcall RePag::DirectX::COElement::NeueFensterPosition(long lPos_x, lo
 	ThreadSicher_Anfang();
 	ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lBreite, lHohe, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -336,57 +336,57 @@ void __vectorcall RePag::DirectX::COElement::NeueFensterPosition(POINT& ptPositi
 	ThreadSicher_Anfang();
 	ptPosition = ptPositionA;
 
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lBreite, lHohe, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeueFensterGrosse(long lHoheA, long lBreiteA)
+void __vectorcall RePag::DirectX::COElement::NeueFensterGrosse(long lHeightA, long lWidthA)
 {
 	ThreadSicher_Anfang();
-	lHohe = lHoheA; lBreite = lBreiteA;
+	lHeight = lHeightA; lWidth = lWidthA;
 
 	InvalidateRect(hWndElement, nullptr, false);
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lBreite, lHohe, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeueFensterHohe(long lHoheA)
+void __vectorcall RePag::DirectX::COElement::NeueFensterHohe(long lHeightA)
 {
 	ThreadSicher_Anfang();
-	lHohe = lHoheA;
+	lHeight = lHeightA;
 
 	InvalidateRect(hWndElement, nullptr, false);
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lBreite, lHohe, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeueFensterBreite(long lBreiteA)
+void __vectorcall RePag::DirectX::COElement::NeueFensterBreite(long lWidthA)
 {
 	ThreadSicher_Anfang();
-	lBreite = lBreiteA;
+	lWidth = lWidthA;
 
 	InvalidateRect(hWndElement, nullptr, false);
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lBreite, lHohe, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeuesFenster(long lHoheA, long lBreiteA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::COElement::NeuesFenster(long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
 	ThreadSicher_Anfang();
-	lHohe = lHoheA; lBreite = lBreiteA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
+	lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
 	InvalidateRect(hWndElement, nullptr, false);
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lBreite, lHohe, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::AndernFensterGrosse(long lHoheA, long lBreiteA)
+void __vectorcall RePag::DirectX::COElement::AndernFensterGrosse(long lHeightA, long lWidthA)
 {
 	ThreadSicher_Anfang();
-	lHohe += lHoheA; lBreite += lBreiteA;
+	lHeight += lHeightA; lWidth += lWidthA;
 
 	InvalidateRect(hWndElement, nullptr, false);
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lBreite, lHohe, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -395,7 +395,7 @@ void __vectorcall RePag::DirectX::COElement::AndernFensterPosition(long lPos_x, 
 	ThreadSicher_Anfang();
 	ptPosition.x += lPos_x; ptPosition.y += lPos_y;
 
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lBreite, lHohe, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
 	ThreadSicher_Ende();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------

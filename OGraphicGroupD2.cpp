@@ -138,12 +138,12 @@ void __vectorcall RePag::DirectX::COGraphicGroup::WM_Command_GrafikGruppe(unsign
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::ErstellFensterInRahmen(COGraphic* pGrafik)
 {
-	pGrafik->ErstellFenster(hWndElement, lHohe - rcEffektrand.top - rcEffektrand.bottom, lBreite - rcEffektrand.left - rcEffektrand.right, rcEffektrand.left, rcEffektrand.top);
+	pGrafik->ErstellFenster(hWndElement, lHeight - rcEffektrand.top - rcEffektrand.bottom, lWidth - rcEffektrand.left - rcEffektrand.right, rcEffektrand.left, rcEffektrand.top);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphicGroup::ErstellFensterInGruppe(COGraphic* pGrafik, long lHoheA, long lBreiteA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::COGraphicGroup::ErstellFensterInGruppe(COGraphic* pGrafik, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
-	pGrafik->ErstellFenster(hWndElement, lHoheA, lBreiteA, lPos_x, lPos_y);
+	pGrafik->ErstellFenster(hWndElement, lHeightA, lWidthA, lPos_x, lPos_y);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::SetzSichtbar(bool bSichtbar)
