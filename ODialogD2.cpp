@@ -60,9 +60,9 @@ namespace RePag
 		//-----------------------------------------------------------------------------------------------------------------------------------------
 		DWORD WINAPI thWM_Command_Dialog(void* pvParam)
 		{
-			_WM_Command->pDialog->ThreadSicher_Anfang();
+			_WM_Command->pDialog->ThreadSafe_Begin();
 			_WM_Command->pDialog->pfnWM_Command(_WM_Command->hWndDlg, _WM_Command->uiMessage, _WM_Command->wParam, _WM_Command->lParam);
-			_WM_Command->pDialog->ThreadSicher_Ende();
+			_WM_Command->pDialog->ThreadSafe_End();
 
 			void* pvThreadId = vthlThreadId->ThIteratorToBegin_Lock(); void* pvLoschen = nullptr;
 			while(pvThreadId){
@@ -87,19 +87,19 @@ namespace RePag
 													return NULL;
 				case WM_SIZE		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 													if(pDialog){
-														pDialog->ThreadSicher_Anfang();
+														pDialog->ThreadSafe_Begin();
 														pDialog->WM_Size_Element(hWnd, lParam);
 														if(pDialog->pfnWM_Size) pDialog->pfnWM_Size(pDialog, wParam, lParam);
-														pDialog->ThreadSicher_Ende();
+														pDialog->ThreadSafe_End();
 													}
 													else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
 													return NULL;
 				//case WM_MOVE		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 				//									if(pDialog){
-				//										pDialog->ThreadSicher_Anfang();
+				//										pDialog->ThreadSafe_Begin();
 				//										pDialog->WM_Move_Dialog();
 				//										if(pDialog->pfnWM_Move) pDialog->pfnWM_Move(pDialog, lParam);
-				//										pDialog->ThreadSicher_Ende();
+				//										pDialog->ThreadSafe_End();
 				//									}
 				//									else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
 				//									return NULL;
@@ -203,7 +203,7 @@ void __vectorcall RePag::DirectX::CODialog::WM_Create(void)
 ////-----------------------------------------------------------------------------------------------------------------------------------------
 //void __vectorcall RePag::DirectX::CODialog::WM_Paint_Dialog(void)
 //{
-//	ThreadSicher_Anfang();
+//	ThreadSafe_Begin();
 //	PAINTSTRUCT stPaint;
 //	BeginPaint(hWndElement, &stPaint);
 //	if(pfnWM_Paint) pfnWM_Paint(this, stPaint);
@@ -214,7 +214,7 @@ void __vectorcall RePag::DirectX::CODialog::WM_Create(void)
 //	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
 //
 //	EndPaint(hWndElement, &stPaint);
-//	ThreadSicher_Ende();
+//	ThreadSafe_End();
 //}
 ////-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::CODialog::WM_Command_Dialog(unsigned int uiMessage, WPARAM wParam, LPARAM lParam)
@@ -315,13 +315,13 @@ long __vectorcall RePag::DirectX::CODialog::SetzSichtbar(bool bSichtbar, unsigne
 				vthlThreadId->NextElement(pvThreadId);
 			}
 			vthlThreadId->ThIteratorEnd();
-			if(pElement) ((CODialog*)pElement)->ThreadSicher_Ende();
+			if(pElement) ((CODialog*)pElement)->ThreadSafe_End();
 			PostMessage(hWndElement, WM_COMMAND, IDE_DLG_SICHTBAR, NULL);
 			while(GetMessage(&msg, nullptr, NULL, NULL)){
 				if(msg.message == WM_COMMAND) WM_Command_Dialog(WM_COMMAND, msg.wParam, msg.lParam);
 				else{ if(!TranslateAccelerator(msg.hwnd, hAccelerator, &msg)){ TranslateMessage(&msg); DispatchMessage(&msg); } }
 			}
-			if(pElement) ((CODialog*)pElement)->ThreadSicher_Anfang();
+			if(pElement) ((CODialog*)pElement)->ThreadSafe_Begin();
 		}
 		if(bModal){
 			void* pvDialoge = vthlDialoge->ThIteratorToBegin();

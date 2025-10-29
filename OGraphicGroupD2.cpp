@@ -63,9 +63,9 @@ namespace RePag
 		//---------------------------------------------------------------------------------------------------------------------------------------
 		DWORD WINAPI thWM_Command_GraphicGroup(void* pvParam)
 		{
-			_WM_Command->pGraphicGroup->ThreadSicher_Anfang();
+			_WM_Command->pGraphicGroup->ThreadSafe_Begin();
 			_WM_Command->pGraphicGroup->pfnWM_Command(_WM_Command->hWndGG, _WM_Command->uiMessage, _WM_Command->wParam, _WM_Command->lParam);
-			_WM_Command->pGraphicGroup->ThreadSicher_Ende();
+			_WM_Command->pGraphicGroup->ThreadSafe_End();
 
 			void* pvThreadId = vthlThreadId->ThIteratorToBegin_Lock(); void* pvLoschen = nullptr;
 			while(pvThreadId){
@@ -115,13 +115,13 @@ void __vectorcall RePag::DirectX::COGraphicGroup::COGraphicGroupV(const VMEMORY 
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::WM_Paint(void)
 {
-	ThreadSicher_Anfang();
+	ThreadSafe_Begin();
 	PAINTSTRUCT stPaint;
 	BeginPaint(hWndElement, &stPaint);
 	//WM_Paint_Hintergrund(stPaint);
 	if(pfnWM_Paint) pfnWM_Paint(this, stPaint);
 	EndPaint(hWndElement, &stPaint);
-	ThreadSicher_Ende();
+	ThreadSafe_End();
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::WM_Command_GrafikGruppe(unsigned int uiMessage, WPARAM wParam, LPARAM lParam)

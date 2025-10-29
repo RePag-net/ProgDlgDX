@@ -58,12 +58,6 @@ namespace RePag
 			bool bHintergrund;
 			unsigned char ucHintergrundeffekt;
 			D2D1_COLOR_F crfBackgroundEffect;
-			//void __vectorcall Hintergrund(RECT& rcZeichnen);
-			//void __vectorcall Hintergrund_Effekt(RECT* prcZeichnen);
-			//void __vectorcall Effekt_Beleuchtung_Horizontal(void);
-			//void __vectorcall Effekt_Beleuchtung_Vertical(void);
-			//void __vectorcall Effekt_Rand_Horizontal(void);
-			//void __vectorcall Effekt_Rand_Vertical(void);
 
 		protected:
 			VMEMORY vmSpeicher;
@@ -80,10 +74,8 @@ namespace RePag
 			unsigned char ucRahmenbreite;
 			void __vectorcall WM_Create_Element(HWND hWnd);
 			void __vectorcall WM_Size_Element(HWND hWnd, LPARAM lParam);
-			//void __vectorcall WM_Paint(void);
-			//void __vectorcall WM_Paint_Hintergrund(PAINTSTRUCT& stPaint);
-			inline void __vectorcall ThreadSicher_Anfang(void);
-			inline void __vectorcall ThreadSicher_Ende(void);
+			inline void __vectorcall ThreadSafe_Begin(void);
+			inline void __vectorcall ThreadSafe_End(void);
 			void __vectorcall COElementV(_In_ const VMEMORY vmSpeicherA, _In_ STDeviceResources* pstDeviceResourcesA);
 
 			STDeviceResources* pstDeviceResources;
@@ -113,10 +105,9 @@ namespace RePag
 			void __vectorcall AndernFensterGrosse(long lHeightA, long lWidthA);
 			void __vectorcall AndernFensterPosition(long lPos_x, long lPos_y);
 			void __vectorcall SetBackgroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ unsigned char ucAlpha);
+			void __vectorcall SetBackgroundColor(_In_ D2D1_COLOR_F& crfBackgroundA);
 			void __vectorcall GetBackgroundColor(_In_ D2D1_COLOR_F& crfBackgroundA);
 			void __vectorcall Hintergrundeffekt(unsigned char ucEffekt);
-			void __vectorcall Hintergrundeffektfarbe(unsigned char ucRot, unsigned char ucGrun, unsigned char ucBlau, unsigned char ucAlpha);
-			void __vectorcall Hintergrundeffektrand(long lOben, long lUnten, long lLinks, long lRechts);
 			void __vectorcall Effekt_Timer(bool bStarten, unsigned long ulInterval_msek, void CALLBACK fnEffekt_Timer(COElement*, bool bTimerOrWaitFired));
 			//void __vectorcall UpdateFenster(RECT* prcFenster, bool bUpdateHintergrund, bool bUpdateHintergrundeffekt);
 			void __vectorcall SetzHintergrund(bool bMitHintergrund);
