@@ -29,19 +29,19 @@ SOFTWARE.
 
 #define _WM_Command ((STTHWM_CommandGG*)pvParam)
 //-------------------------------------------------------------------------------------------------------------------------------------------
-COGraphicGroup* __vectorcall RePag::DirectX::COGrafikGruppeV(_In_ const char* pcFensterName, _In_ unsigned int uiIDElement,
+COGraphicGroup* __vectorcall RePag::DirectX::COGrafikGruppeV(_In_ const char* pcWindowName, _In_ unsigned int uiIDElement,
 																												 _In_ STDeviceResources* pstDeviceResourcesA)
 {
 	COGraphicGroup* vGrafikGruppe = (COGraphicGroup*)VMBlock(vmDialog, sizeof(COGraphicGroup));
-	vGrafikGruppe->COGraphicGroupV((BYTE*)vmDialog, pcFensterName, uiIDElement, pstDeviceResourcesA);
+	vGrafikGruppe->COGraphicGroupV((BYTE*)vmDialog, pcWindowName, uiIDElement, pstDeviceResourcesA);
 	return vGrafikGruppe;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-COGraphicGroup* __vectorcall RePag::DirectX::COGrafikGruppeV(_In_ const VMEMORY vmSpeicher, _In_ const char* pcFensterName, _In_ unsigned int uiIDElement,
+COGraphicGroup* __vectorcall RePag::DirectX::COGrafikGruppeV(_In_ const VMEMORY vmMemory, _In_ const char* pcWindowName, _In_ unsigned int uiIDElement,
 																												 _In_ STDeviceResources* pstDeviceResourcesA)
 {
-	COGraphicGroup* vGrafikGruppe = (COGraphicGroup*)VMBlock(vmSpeicher, sizeof(COGraphicGroup));
-	vGrafikGruppe->COGraphicGroupV((BYTE*)vmSpeicher, pcFensterName, uiIDElement, pstDeviceResourcesA);
+	COGraphicGroup* vGrafikGruppe = (COGraphicGroup*)VMBlock(vmMemory, sizeof(COGraphicGroup));
+	vGrafikGruppe->COGraphicGroupV((BYTE*)vmMemory, pcWindowName, uiIDElement, pstDeviceResourcesA);
 	return vGrafikGruppe;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -103,10 +103,10 @@ namespace RePag
 	}
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphicGroup::COGraphicGroupV(const VMEMORY vmSpeicher, const char* pcFensterName, unsigned int uiDElementA, 
+void __vectorcall RePag::DirectX::COGraphicGroup::COGraphicGroupV(const VMEMORY vmMemory, const char* pcWindowName, unsigned int uiDElementA, 
 																															_In_ STDeviceResources* pstDeviceResourcesA)
 {
-	COGraphicV(vmSpeicher, pcRePag_GraphicGroup, pcFensterName, uiDElementA, pstDeviceResourcesA);
+	COGraphicV(vmMemory, pcRePag_GraphicGroup, pcWindowName, uiDElementA, pstDeviceResourcesA);
 	SetzHintergrund(false);
 
 	pfnWM_Command = nullptr;
@@ -138,12 +138,12 @@ void __vectorcall RePag::DirectX::COGraphicGroup::WM_Command_GrafikGruppe(unsign
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::ErstellFensterInRahmen(COGraphic* pGrafik)
 {
-	pGrafik->ErstellFenster(hWndElement, lHeight - rcEffektrand.top - rcEffektrand.bottom, lWidth - rcEffektrand.left - rcEffektrand.right, rcEffektrand.left, rcEffektrand.top);
+	pGrafik->CreateWindowGraphic(hWndElement, lHeight - rcEffektrand.top - rcEffektrand.bottom, lWidth - rcEffektrand.left - rcEffektrand.right, rcEffektrand.left, rcEffektrand.top);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::ErstellFensterInGruppe(COGraphic* pGrafik, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
-	pGrafik->ErstellFenster(hWndElement, lHeightA, lWidthA, lPos_x, lPos_y);
+	pGrafik->CreateWindowGraphic(hWndElement, lHeightA, lWidthA, lPos_x, lPos_y);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::SetzSichtbar(bool bSichtbar)

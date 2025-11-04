@@ -60,7 +60,7 @@ namespace RePag
 			D2D1_COLOR_F crfBackgroundEffect;
 
 		protected:
-			VMEMORY vmSpeicher;
+			VMEMORY vmMemory;
 			HWND hWndElement;
 			HANDLE htEffekt_Timer;
 			long lHeight;
@@ -71,12 +71,12 @@ namespace RePag
 			RECT rclDirty;
 			DXGI_PRESENT_PARAMETERS dxgiPresent;
 			RECT rcEffektrand;
-			unsigned char ucRahmenbreite;
+			//unsigned char ucRahmenbreite;
 			void __vectorcall WM_Create_Element(HWND hWnd);
 			void __vectorcall WM_Size_Element(HWND hWnd, LPARAM lParam);
 			inline void __vectorcall ThreadSafe_Begin(void);
 			inline void __vectorcall ThreadSafe_End(void);
-			void __vectorcall COElementV(_In_ const VMEMORY vmSpeicherA, _In_ STDeviceResources* pstDeviceResourcesA);
+			void __vectorcall COElementV(_In_ const VMEMORY vmMemoryA, _In_ STDeviceResources* pstDeviceResourcesA);
 
 			STDeviceResources* pstDeviceResources;
 			ID2D1DeviceContext6* ifD2D1Context6;
@@ -89,7 +89,7 @@ namespace RePag
 			VMEMORY __vectorcall COFreiV(void);
 			void(__vectorcall* pfnWM_Size)(COElement*, WPARAM, LPARAM);
 			HWND __vectorcall HWND_Element(void);
-			HWND __vectorcall HWND_Haupt(void);
+			HWND __vectorcall HWND_Main(void);
 			long& __vectorcall Width(long& lWidthA);
 			long& __vectorcall Height(long& lHeightA);
 			long& __vectorcall Pos_X(long& lPos_x);

@@ -44,7 +44,7 @@ namespace RePag
 		protected:
 
 		public:
-			void __vectorcall COGraphicGroupV(_In_ const VMEMORY vmSpeicher, _In_ const char* pcFensterName, _In_ unsigned int uiDElementA,
+			void __vectorcall COGraphicGroupV(_In_ const VMEMORY vmMemory, _In_ const char* pcWindowName, _In_ unsigned int uiDElementA,
 																				_In_ STDeviceResources* pstDeviceResourcesA);
 			void __vectorcall ErstellFensterInRahmen(COGraphic* pGraphic);
 			void __vectorcall ErstellFensterInGruppe(COGraphic* pGraphic, long lHolHeightAheA, long lWidthA, long lPos_x, long lPos_y);
@@ -53,8 +53,8 @@ namespace RePag
 			void __vectorcall SetzSichtbar(bool bSichtbar);
 		};
 		//---------------------------------------------------------------------------------------------------------------------------------------
-		__declspec(dllexport) COGraphicGroup* __vectorcall COGrafikGruppeV(_In_ const char* pcFensterName, _In_ unsigned int uiIDElement, _In_ STDeviceResources* pstDeviceResourcesA);
-		__declspec(dllexport) COGraphicGroup* __vectorcall COGrafikGruppeV(_In_ const VMEMORY vmSpeicher, _In_ const char* pcFensterName, _In_ unsigned int uiIDElement,
+		__declspec(dllexport) COGraphicGroup* __vectorcall COGrafikGruppeV(_In_ const char* pcWindowName, _In_ unsigned int uiIDElement, _In_ STDeviceResources* pstDeviceResourcesA);
+		__declspec(dllexport) COGraphicGroup* __vectorcall COGrafikGruppeV(_In_ const VMEMORY vmMemory, _In_ const char* pcWindowName, _In_ unsigned int uiIDElement,
 																																			 _In_ STDeviceResources* pstDeviceResourcesA);
 		//---------------------------------------------------------------------------------------------------------------------------------------
 	}

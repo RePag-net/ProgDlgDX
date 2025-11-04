@@ -48,9 +48,9 @@ SOFTWARE.
 #define HGE_RAND_H 8
 #define HGE_RAND_V 16
 //------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::COElementV(_In_ const VMEMORY vmSpeicherA, _In_ STDeviceResources* pstDeviceResourcesA)
+void __vectorcall RePag::DirectX::COElement::COElementV(_In_ const VMEMORY vmMemoryA, _In_ STDeviceResources* pstDeviceResourcesA)
 {
-	vmSpeicher = vmSpeicherA;
+	vmMemory = vmMemoryA;
 	pstDeviceResources = pstDeviceResourcesA;
 	bHintergrund = true;
 	hWndElement = nullptr;
@@ -60,7 +60,7 @@ void __vectorcall RePag::DirectX::COElement::COElementV(_In_ const VMEMORY vmSpe
 	ucHintergrundeffekt = HGE_HINTERGRUND;
 	crfBackgroundEffect = D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f);
 	rcEffektrand.left = rcEffektrand.right = rcEffektrand.top = rcEffektrand.bottom = 0;
-	ucRahmenbreite = 0;
+	//ucRahmenbreite = 0;
 
 	stThread.ucFunktion = stThread.dwAktiv = stThread.ucWarten = 0; stThread.dwHaupt = stThread.dwAktiv = GetCurrentThreadId();
 	stThread.heElement[0] = CreateEvent(nullptr, false, true, nullptr); stThread.heElement[1] = CreateEvent(nullptr, false, false, nullptr);
@@ -86,7 +86,7 @@ VMEMORY __vectorcall RePag::DirectX::COElement::COFreiV(void)
 	SafeRelease(&ifd2dBitmap1);
 	SafeRelease(&ifBackColor);
 
-	return vmSpeicher;
+	return vmMemory;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::CreateWindowSizeDependentResources(void)
@@ -169,7 +169,7 @@ HWND __vectorcall RePag::DirectX::COElement::HWND_Element(void)
 	return hWndElement;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-HWND __vectorcall RePag::DirectX::COElement::HWND_Haupt(void)
+HWND __vectorcall RePag::DirectX::COElement::HWND_Main(void)
 {
 	return GetParent(hWndElement);
 }

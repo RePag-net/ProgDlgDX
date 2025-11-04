@@ -119,18 +119,18 @@ namespace RePag
 		//-----------------------------------------------------------------------------------------------------------------------------------------
 	}
 }
-void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_ const VMEMORY vmSpeicher, _In_z_ const char* pcFensterName, _In_ bool bModalA,
+void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_ const VMEMORY vmMemory, _In_z_ const char* pcWindowName, _In_ bool bModalA,
 																									_In_ LRESULT CALLBACK WndProc_DLG(HWND, unsigned int, WPARAM, LPARAM),
 																									_In_ STDeviceResources* pstDeviceResourcesA)
 {
-	COElementV(vmSpeicher, pstDeviceResourcesA);
+	COElementV(vmMemory, pstDeviceResourcesA);
 
 	vthlDialoge->ThToEnd(this);
 
 	vstFensterBau = (STFensterBau*)VMBlock(sizeof(STFensterBau));
 	vstFensterBau->dwFensterStil = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_CLIPCHILDREN;
 	vstFensterBau->dwErweitertStil = WS_EX_TOOLWINDOW;
-	vstFensterBau->asName = pcFensterName;
+	vstFensterBau->asName = pcWindowName;
 
 	vstFensterBau->wndKlasse.cbSize = sizeof(WNDCLASSEX);
 	vstFensterBau->wndKlasse.style = CS_OWNDC;
@@ -166,11 +166,11 @@ void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_ const VMEMORY vmSpeic
 	pfnWM_Move = nullptr;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_z_ const char* pcFensterName, _In_ bool bModalA,
+void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_z_ const char* pcWindowName, _In_ bool bModalA,
 																									_In_ LRESULT CALLBACK WndProc_DLG(HWND, unsigned int, WPARAM, LPARAM),
 																									_In_ STDeviceResources* pstDeviceResourcesA)
 {
-	CODialogV(vmDialog, pcFensterName, bModalA, WndProc_DLG, pstDeviceResourcesA);
+	CODialogV(vmDialog, pcWindowName, bModalA, WndProc_DLG, pstDeviceResourcesA);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 VMEMORY __vectorcall RePag::DirectX::CODialog::COFreiV(void)
@@ -248,7 +248,7 @@ void __vectorcall RePag::DirectX::CODialog::FensterTitel(const char* pcFensterTi
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::ErstellFenster(HWND hWndHaupt, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::CODialog::CreateWindowDialog(HWND hWndMain, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
 	if(vstFensterBau){
 		vstFensterBau->wndKlasse.lpszClassName = vstFensterBau->asName.c_Str();
@@ -261,9 +261,9 @@ void __vectorcall RePag::DirectX::CODialog::ErstellFenster(HWND hWndHaupt, long 
 		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
 		hWndElement = CreateWindowEx(vstFensterBau->dwErweitertStil, vstFensterBau->asName.c_Str(), vstFensterBau->asName.c_Str(), vstFensterBau->dwFensterStil,
-																 ptPosition.x, ptPosition.y, lWidth, lHeight, hWndHaupt, nullptr, hInstance, this);
+																 ptPosition.x, ptPosition.y, lWidth, lHeight, hWndMain, nullptr, hInstance, this);
 
-		if(!hWndErstes && !hWndHaupt) hWndErstes = hWndElement;
+		if(!hWndErstes && !hWndMain) hWndErstes = hWndElement;
 		if(hWndElement){
 			SetWindowText(hWndElement, vstFensterBau->vbTitel); SetWindowLongPtr(hWndElement, GWLP_USERDATA, (LONG_PTR)this);
 			RECT rcClient; GetClientRect(hWndElement, &rcClient); lWidth = rcClient.right; lHeight = rcClient.bottom;

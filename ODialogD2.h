@@ -65,16 +65,16 @@ namespace RePag
 			void __vectorcall Menu(long lMenu);
 
 		public:
-			void __vectorcall CODialogV(_In_z_ const char* pcFensterName, _In_ bool bModalA, _In_ LRESULT CALLBACK WndProc_DLG(HWND, unsigned int, WPARAM, LPARAM),
+			void __vectorcall CODialogV(_In_z_ const char* pcWindowName, _In_ bool bModalA, _In_ LRESULT CALLBACK WndProc_DLG(HWND, unsigned int, WPARAM, LPARAM),
 																	_In_ STDeviceResources* pstDeviceResourcesA);
-			void __vectorcall CODialogV(_In_ const VMEMORY vmSpeicher, _In_z_ const char* pcFensterName, _In_ bool bModalA,
+			void __vectorcall CODialogV(_In_ const VMEMORY vmMemory, _In_z_ const char* pcWindowName, _In_ bool bModalA,
 																	_In_ LRESULT CALLBACK WndProc_DLG(HWND, unsigned int, WPARAM, LPARAM), _In_ STDeviceResources* pstDeviceResourcesA);
 			VMEMORY __vectorcall COFreiV(void);
 			LRESULT(CALLBACK* pfnWndProc_Dialog)(HWND, unsigned int, WPARAM, LPARAM);
 			void(__vectorcall* pfnWM_Paint)(CODialog*, PAINTSTRUCT&);
 			void(__vectorcall* pfnWM_Move)(CODialog*, LPARAM);
 			void(__vectorcall* pfnWM_Command)(HWND, unsigned int, WPARAM, LPARAM);
-			void __vectorcall ErstellFenster(HWND hWndHaupt, long lHeightA, long lWidthA, long lPos_x, long lPos_y);
+			void __vectorcall CreateWindowDialog(HWND hWndMain, long lHeightA, long lWidthA, long lPos_x, long lPos_y);
 			long __vectorcall SetzSichtbar(bool bSichtbar, unsigned char ucAusrichtung, long lRuckgabeA);
 			void __vectorcall Schliessen(void);
 			LOGFONT lfSchrift;
