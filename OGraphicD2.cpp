@@ -32,14 +32,14 @@ void __vectorcall RePag::DirectX::COGraphic::COGraphicV(_In_ const VMEMORY vmMem
 {
 	COElementV(vmMemory, pstDeviceResourcesA);
 
-	vstFensterBau = (STFensterBau*)VMBlock(sizeof(STFensterBau));
-	vstFensterBau->dwFensterStil = WS_CHILDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS;
-	vstFensterBau->dwErweitertStil = WS_EX_LEFT | WS_EX_NOPARENTNOTIFY;
-	vstFensterBau->uiIDElement = uiElementA;
-	vstFensterBau->asFensterName = pcWindowName;
+	vstWindowConstraction = (STWindowConstraction*)VMBlock(sizeof(STWindowConstraction));
+	vstWindowConstraction->dwWindowStyle = WS_CHILDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS;
+	vstWindowConstraction->dwExtendStyle = WS_EX_LEFT | WS_EX_NOPARENTNOTIFY;
+	vstWindowConstraction->uiIDElement = uiElementA;
+	vstWindowConstraction->asWindowName = pcWindowName;
 	BYTE ucBytes_Name = (BYTE)StrLength(pcClassName);
-	vstFensterBau->vbKlassenName = VMBlock(ucBytes_Name + 1); vstFensterBau->vbKlassenName[ucBytes_Name] = 0;
-	MemCopy(vstFensterBau->vbKlassenName, pcClassName, ucBytes_Name);
+	vstWindowConstraction->vbClassName = VMBlock(ucBytes_Name + 1); vstWindowConstraction->vbClassName[ucBytes_Name] = 0;
+	MemCopy(vstWindowConstraction->vbClassName, pcClassName, ucBytes_Name);
 
 	heRender = CreateEvent(nullptr, false, true, nullptr);
 }
@@ -50,30 +50,31 @@ VMEMORY __vectorcall RePag::DirectX::COGraphic::COFreiV(void)
 	return ((COElement*)this)->COFreiV();
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphic::FensterStil(DWORD dwFensterStilA)
+void __vectorcall RePag::DirectX::COGraphic::WindowStyle(_In_ DWORD dwWindowStyleA)
 {
-	if(vstFensterBau) vstFensterBau->dwFensterStil = dwFensterStilA;
+	if(vstWindowConstraction) vstWindowConstraction->dwWindowStyle = dwWindowStyleA;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphic::ErweitertStil(DWORD dwErweitertStilA)
+void __vectorcall RePag::DirectX::COGraphic::ExtendStyle(_In_ DWORD dwExtendStyleA)
 {
-	if(vstFensterBau) vstFensterBau->dwErweitertStil = dwErweitertStilA | WS_EX_NOPARENTNOTIFY;
+	if(vstWindowConstraction) vstWindowConstraction->dwExtendStyle = dwExtendStyleA | WS_EX_NOPARENTNOTIFY;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphic::CreateWindowGraphic(HWND hWndMain, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::COGraphic::CreateWindowGraphic(_In_ HWND hWndMain, _In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y)
 {
-	if(vstFensterBau){
-		while(FindWindowEx(hWndMain, nullptr, nullptr, vstFensterBau->asFensterName.c_Str())) vstFensterBau->asFensterName += "A";
+	if(vstWindowConstraction){
+		while(FindWindowEx(hWndMain, nullptr, nullptr, vstWindowConstraction->asWindowName.c_Str())) vstWindowConstraction->asWindowName += "A";
 
 		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
-		hWndElement = CreateWindowEx(vstFensterBau->dwErweitertStil, vstFensterBau->vbKlassenName, vstFensterBau->asFensterName.c_Str(), vstFensterBau->dwFensterStil,
-																 ptPosition.x, ptPosition.y, lWidth, lHeight, hWndMain, reinterpret_cast<HMENU>(static_cast<LONG_PTR>(vstFensterBau->uiIDElement)), hInstance, this);
+		hWndElement = CreateWindowEx(vstWindowConstraction->dwExtendStyle, vstWindowConstraction->vbClassName, vstWindowConstraction->asWindowName.c_Str(),
+																 vstWindowConstraction->dwWindowStyle, ptPosition.x, ptPosition.y, lWidth, lHeight, hWndMain,
+																 reinterpret_cast<HMENU>(static_cast<LONG_PTR>(vstWindowConstraction->uiIDElement)), hInstance, this);
 
 		if(hWndElement){
 			SetWindowLongPtr(hWndElement, GWLP_USERDATA, (LONG_PTR)this);
 			RECT rcClient; GetClientRect(hWndElement, &rcClient);	lWidth = rcClient.right; lHeight = rcClient.bottom;
-			VMFrei(vstFensterBau->vbKlassenName); vstFensterBau->asFensterName.~COStringA(); VMFrei(vstFensterBau); vstFensterBau = nullptr;
+			VMFrei(vstWindowConstraction->vbClassName); vstWindowConstraction->asWindowName.~COStringA(); VMFrei(vstWindowConstraction); vstWindowConstraction = nullptr;
 		}
 	}
 }
@@ -83,7 +84,7 @@ unsigned int __vectorcall RePag::DirectX::COGraphic::IDElement(void)
 	return GetWindowLongPtr(hWndElement, GWLP_ID);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphic::SetVisible(bool bVisible)
+void __vectorcall RePag::DirectX::COGraphic::SetVisible(_In_ bool bVisible)
 {
 	if(bVisible) ShowWindow(hWndElement, SW_SHOWNORMAL);
 	else{ if(hWndElement == GetFocus()) SetFocus(GetParent(hWndElement)); ShowWindow(hWndElement, SW_HIDE); }

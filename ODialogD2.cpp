@@ -28,16 +28,16 @@ SOFTWARE.
 #include "ODialogD2.h"
 //-----------------------------------------------------------------------------------------------------------------------------------------
 #define _Dialog ((CODialog*)((LPCREATESTRUCT)lParam)->lpCreateParams)
-#define DLG_LINKS 1
-#define DLG_RECHTS 2
-#define DLG_OBEN 4
-#define DLG_UNTEN 8
-#define DLG_MITTEVERTICAL 16
-#define DLG_MITTEHORIZONTAL 32
-#define DLG_MINIMAL 64
-#define DLG_MAXIMAL 128
-#define IDE_DLG_SICHTBAR 0xFFFF
-#define IDE_DLG_WM_QUIT 0xFFFE
+constexpr BYTE DLG_LEFT = 1;
+constexpr BYTE DLG_RIGHT = 2;
+constexpr BYTE DLG_TOP = 4;
+constexpr BYTE DLG_BOTTOM = 8;
+constexpr BYTE DLG_CENTERVERTICAL = 16;
+constexpr BYTE DLG_CENTERHORIZONTAL = 32;
+constexpr BYTE DLG_MINIMAL = 64;
+constexpr BYTE DLG_MAXIMAL = 128;
+constexpr BYTE IDE_DLG_VISIBLE = 0xFFFF;
+constexpr BYTE IDE_DLG_WM_QUIT = 0xFFFE;
 //-----------------------------------------------------------------------------------------------------------------------------------------
 #define _WM_Command ((STTHWM_CommandDlg*)pvParam)
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -64,10 +64,10 @@ namespace RePag
 			_WM_Command->pDialog->pfnWM_Command(_WM_Command->hWndDlg, _WM_Command->uiMessage, _WM_Command->wParam, _WM_Command->lParam);
 			_WM_Command->pDialog->ThreadSafe_End();
 
-			void* pvThreadId = vthlThreadId->ThIteratorToBegin_Lock(); void* pvLoschen = nullptr;
+			void* pvThreadId = vthlThreadId->ThIteratorToBegin_Lock(); void* pvDelete = nullptr;
 			while(pvThreadId){
-				if(((STThreadId*)vthlThreadId->Element(pvThreadId))->dwThreadId == _WM_Command->dwThreadId){ vthlThreadId->DeleteElement(pvThreadId, pvLoschen, true); break; }
-				vthlThreadId->NextElement(pvThreadId, pvLoschen);
+				if(((STThreadId*)vthlThreadId->Element(pvThreadId))->dwThreadId == _WM_Command->dwThreadId){ vthlThreadId->DeleteElement(pvThreadId, pvDelete, true); break; }
+				vthlThreadId->NextElement(pvThreadId, pvDelete);
 			}
 			vthlThreadId->ThIteratorEnd();
 			DeleteEvent(_WM_Command->hThread);
@@ -94,22 +94,18 @@ namespace RePag
 													}
 													else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
 													return NULL;
-				//case WM_MOVE		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-				//									if(pDialog){
-				//										pDialog->ThreadSafe_Begin();
-				//										pDialog->WM_Move_Dialog();
-				//										if(pDialog->pfnWM_Move) pDialog->pfnWM_Move(pDialog, lParam);
-				//										pDialog->ThreadSafe_End();
-				//									}
-				//									else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
-				//									return NULL;
+				case WM_MOVE		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+													if(pDialog){
+														pDialog->ThreadSafe_Begin();
+														pDialog->WM_Move_Dialog();
+														if(pDialog->pfnWM_Move) pDialog->pfnWM_Move(pDialog, lParam);
+														pDialog->ThreadSafe_End();
+													}
+													else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
+													return NULL;
 				case WM_COMMAND:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 													if(pDialog->pfnWM_Command){ pDialog->WM_Command_Dialog(uiMessage, wParam, lParam); return NULL; }
 													else break;
-
-				//case WM_PAINT		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-				//									if(pDialog)	pDialog->WM_Paint_Dialog();
-				//									return NULL;
 				case WM_CLOSE		:	DestroyWindow(hWnd);
 													return NULL;
 				case WM_DESTROY: if(hWnd == hWndErstes) PostQuitMessage(0);
@@ -127,42 +123,26 @@ void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_ const VMEMORY vmMemor
 
 	vthlDialoge->ThToEnd(this);
 
-	vstFensterBau = (STFensterBau*)VMBlock(sizeof(STFensterBau));
-	vstFensterBau->dwFensterStil = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_CLIPCHILDREN;
-	vstFensterBau->dwErweitertStil = WS_EX_TOOLWINDOW;
-	vstFensterBau->asName = pcWindowName;
+	vstWindowConstraction = (STWindowConstraction*)VMBlock(sizeof(STWindowConstraction));
+	vstWindowConstraction->dwWindowStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_CLIPCHILDREN;
+	vstWindowConstraction->dwExtendStyle = WS_EX_TOOLWINDOW;
+	vstWindowConstraction->asName = pcWindowName;
 
-	vstFensterBau->wndKlasse.cbSize = sizeof(WNDCLASSEX);
-	vstFensterBau->wndKlasse.style = CS_OWNDC;
-	vstFensterBau->wndKlasse.cbClsExtra = 0;
-	vstFensterBau->wndKlasse.cbWndExtra = 16;
-	vstFensterBau->wndKlasse.hInstance = hInstance;
-	vstFensterBau->wndKlasse.lpfnWndProc = WndProc_Dialog;
-	vstFensterBau->wndKlasse.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	vstFensterBau->wndKlasse.hbrBackground = nullptr;
-	vstFensterBau->wndKlasse.lpszMenuName = nullptr;
-	vstFensterBau->wndKlasse.hIcon = nullptr;
-	vstFensterBau->wndKlasse.hIconSm = nullptr;
+	vstWindowConstraction->wndClass.cbSize = sizeof(WNDCLASSEX);
+	vstWindowConstraction->wndClass.style = CS_OWNDC;
+	vstWindowConstraction->wndClass.cbClsExtra = 0;
+	vstWindowConstraction->wndClass.cbWndExtra = 16;
+	vstWindowConstraction->wndClass.hInstance = hInstance;
+	vstWindowConstraction->wndClass.lpfnWndProc = WndProc_Dialog;
+	vstWindowConstraction->wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	vstWindowConstraction->wndClass.hbrBackground = nullptr;
+	vstWindowConstraction->wndClass.lpszMenuName = nullptr;
+	vstWindowConstraction->wndClass.hIcon = nullptr;
+	vstWindowConstraction->wndClass.hIconSm = nullptr;
 
 	pfnWndProc_DLGDialog = WndProc_DLG;
 	bModal = bModalA;
 
-	lfSchrift.lfHeight = -13;
-	lfSchrift.lfWidth = 0;
-	lfSchrift.lfFaceName[0] = '\0';
-	lfSchrift.lfEscapement = GM_COMPATIBLE;
-	lfSchrift.lfOrientation = GM_COMPATIBLE;
-	lfSchrift.lfItalic = FALSE;
-	lfSchrift.lfUnderline = FALSE;
-	lfSchrift.lfStrikeOut = FALSE;
-	lfSchrift.lfWeight = FW_DONTCARE;
-	lfSchrift.lfCharSet = DEFAULT_CHARSET;
-	lfSchrift.lfOutPrecision = OUT_DEVICE_PRECIS;
-	lfSchrift.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-	lfSchrift.lfQuality = DEFAULT_QUALITY;
-	lfSchrift.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-
-	pfnWM_Paint = nullptr;
 	pfnWM_Move = nullptr;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -175,8 +155,8 @@ void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_z_ const char* pcWindo
 //-----------------------------------------------------------------------------------------------------------------------------------------
 VMEMORY __vectorcall RePag::DirectX::CODialog::COFreiV(void)
 {
-	if(htEffekt_Timer) DeleteTimerQueueTimer(htqTimerQueue, htEffekt_Timer, INVALID_HANDLE_VALUE);
-	LoschWndKlasse(GetClassWord(hWndElement, GCW_ATOM));
+	if(htEffect_Timer) DeleteTimerQueueTimer(htqTimerQueue, htEffect_Timer, INVALID_HANDLE_VALUE);
+	DeleteWndClass(GetClassWord(hWndElement, GCW_ATOM));
 
 	void* pvDialoge = vthlDialoge->ThIteratorToBegin_Lock(); void* pvLoschen = nullptr;
 	while(pvDialoge){
@@ -196,28 +176,12 @@ void __vectorcall RePag::DirectX::CODialog::WM_Create(void)
 	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-//void __vectorcall RePag::DirectX::CODialog::WM_Move_Dialog(void)
-//{
-//	if(hWndElement){ RECT rcFenster; GetWindowRect(hWndElement, &rcFenster); ptPosition.x = rcFenster.left; ptPosition.y = rcFenster.top; }
-//}
-////-----------------------------------------------------------------------------------------------------------------------------------------
-//void __vectorcall RePag::DirectX::CODialog::WM_Paint_Dialog(void)
-//{
-//	ThreadSafe_Begin();
-//	PAINTSTRUCT stPaint;
-//	BeginPaint(hWndElement, &stPaint);
-//	if(pfnWM_Paint) pfnWM_Paint(this, stPaint);
-//
-//	ifD2D1Context6->BeginDraw();
-//	ifD2D1Context6->Clear(stBackColor);
-//	ifD2D1Context6->EndDraw();
-//	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
-//
-//	EndPaint(hWndElement, &stPaint);
-//	ThreadSafe_End();
-//}
-////-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::WM_Command_Dialog(unsigned int uiMessage, WPARAM wParam, LPARAM lParam)
+void __vectorcall RePag::DirectX::CODialog::WM_Move_Dialog(void)
+{
+	if(hWndElement){ RECT rcWindow; GetWindowRect(hWndElement, &rcWindow); ptPosition.x = rcWindow.left; ptPosition.y = rcWindow.top; }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::WM_Command_Dialog(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	STTHWM_CommandDlg* stthWM_Command = (STTHWM_CommandDlg*)VMBlock(sizeof(STTHWM_CommandDlg));
 	stthWM_Command->hWndDlg = hWndElement;	stthWM_Command->pDialog = this; stthWM_Command->uiMessage = uiMessage; stthWM_Command->wParam = wParam;	stthWM_Command->lParam = lParam;
@@ -229,66 +193,66 @@ void __vectorcall RePag::DirectX::CODialog::WM_Command_Dialog(unsigned int uiMes
 	if(stthWM_Command->hThread){ SetThreadPriority(stthWM_Command->hThread, THREAD_PRIORITY_NORMAL); ResumeThread(stthWM_Command->hThread); }
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::FensterStil(DWORD dwFensterStilA)
+void __vectorcall RePag::DirectX::CODialog::WindowStyle(_In_ DWORD dwWindowStyleA)
 {
-	if(vstFensterBau) vstFensterBau->dwFensterStil = dwFensterStilA;
+	if(vstWindowConstraction) vstWindowConstraction->dwWindowStyle = dwWindowStyleA;
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::ErweitertStil(DWORD dwErweitertStilA)
+void __vectorcall RePag::DirectX::CODialog::ExtendStyle(_In_ DWORD dwExtendStyleA)
 {
-	if(vstFensterBau) vstFensterBau->dwErweitertStil = dwErweitertStilA;
+	if(vstWindowConstraction) vstWindowConstraction->dwExtendStyle = dwExtendStyleA;
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::FensterTitel(const char* pcFensterTitel)
+void __vectorcall RePag::DirectX::CODialog::WindowTitel(_In_ const char* pcWindowTitel)
 {
-	if(vstFensterBau){
-		BYTE ucBytes_Titel = (BYTE)StrLength((char*)pcFensterTitel);
-		vstFensterBau->vbTitel = VMBlock(ucBytes_Titel + 1); vstFensterBau->vbTitel[ucBytes_Titel] = 0;
-		MemCopy(vstFensterBau->vbTitel, pcFensterTitel, ucBytes_Titel);
+	if(vstWindowConstraction){
+		BYTE ucBytes_Titel = (BYTE)StrLength((char*)pcWindowTitel);
+		vstWindowConstraction->vbTitel = VMBlock(ucBytes_Titel + 1); vstWindowConstraction->vbTitel[ucBytes_Titel] = 0;
+		MemCopy(vstWindowConstraction->vbTitel, pcWindowTitel, ucBytes_Titel);
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::CreateWindowDialog(HWND hWndMain, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::CODialog::CreateWindowDialog(_In_ HWND hWndMain, _In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y)
 {
-	if(vstFensterBau){
-		vstFensterBau->wndKlasse.lpszClassName = vstFensterBau->asName.c_Str();
-		while(!RegisterClassEx(&vstFensterBau->wndKlasse)){
-			while(FindWindow(vstFensterBau->wndKlasse.lpszClassName, nullptr)){
-				vstFensterBau->asName += "A";
-				vstFensterBau->wndKlasse.lpszClassName = vstFensterBau->asName.c_Str();
+	if(vstWindowConstraction){
+		vstWindowConstraction->wndClass.lpszClassName = vstWindowConstraction->asName.c_Str();
+		while(!RegisterClassEx(&vstWindowConstraction->wndClass)){
+			while(FindWindow(vstWindowConstraction->wndClass.lpszClassName, nullptr)){
+				vstWindowConstraction->asName += "A";
+				vstWindowConstraction->wndClass.lpszClassName = vstWindowConstraction->asName.c_Str();
 			}
 		}
 		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
-		hWndElement = CreateWindowEx(vstFensterBau->dwErweitertStil, vstFensterBau->asName.c_Str(), vstFensterBau->asName.c_Str(), vstFensterBau->dwFensterStil,
-																 ptPosition.x, ptPosition.y, lWidth, lHeight, hWndMain, nullptr, hInstance, this);
+		hWndElement = CreateWindowEx(vstWindowConstraction->dwExtendStyle, vstWindowConstraction->asName.c_Str(), vstWindowConstraction->asName.c_Str(),
+																 vstWindowConstraction->dwWindowStyle, ptPosition.x, ptPosition.y, lWidth, lHeight, hWndMain, nullptr, hInstance, this);
 
 		if(!hWndErstes && !hWndMain) hWndErstes = hWndElement;
 		if(hWndElement){
-			SetWindowText(hWndElement, vstFensterBau->vbTitel); SetWindowLongPtr(hWndElement, GWLP_USERDATA, (LONG_PTR)this);
+			SetWindowText(hWndElement, vstWindowConstraction->vbTitel); SetWindowLongPtr(hWndElement, GWLP_USERDATA, (LONG_PTR)this);
 			RECT rcClient; GetClientRect(hWndElement, &rcClient); lWidth = rcClient.right; lHeight = rcClient.bottom;
-			VMFrei(vstFensterBau->vbTitel); vstFensterBau->asName.~COStringA(); VMFrei(vstFensterBau); vstFensterBau = nullptr;
+			VMFrei(vstWindowConstraction->vbTitel); vstWindowConstraction->asName.~COStringA(); VMFrei(vstWindowConstraction); vstWindowConstraction = nullptr;
 		}
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-long __vectorcall RePag::DirectX::CODialog::SetzSichtbar(bool bSichtbar, unsigned char ucAusrichtung, long lRuckgabeA)
+long __vectorcall RePag::DirectX::CODialog::SetVisible(_In_ bool bVisible, _In_ unsigned char ucAlignment, _In_ long lReturnA)
 {
-	if(bSichtbar){
+	if(bVisible){
 		int iShow = SW_SHOWNORMAL;
-		if(ucAusrichtung == DLG_MAXIMAL) iShow = SW_SHOWMAXIMIZED;
-		else if(ucAusrichtung == DLG_MINIMAL) iShow = SW_MINIMIZE;
-		else if(ucAusrichtung){
+		if(ucAlignment == DLG_MAXIMAL) iShow = SW_SHOWMAXIMIZED;
+		else if(ucAlignment == DLG_MINIMAL) iShow = SW_MINIMIZE;
+		else if(ucAlignment){
 			RECT rcRect; POINT ptDialog; long lTemp;
 			GetWindowRect(GetParent(hWndElement), &rcRect);
 			ptDialog.x = rcRect.left; ptDialog.y = rcRect.top;
-			if(ucAusrichtung & DLG_LINKS) ptDialog.x = rcRect.left;
-			if(ucAusrichtung & DLG_RECHTS) ptDialog.x = rcRect.right - Width(lTemp);
-			if(ucAusrichtung & DLG_OBEN) ptDialog.y = rcRect.top;
-			if(ucAusrichtung & DLG_UNTEN) ptDialog.y = rcRect.bottom - Height(lTemp);
-			if(ucAusrichtung & DLG_MITTEVERTICAL) ptDialog.x = rcRect.left + (rcRect.right - rcRect.left) / 2 - Width(lTemp) / 2;
-			if(ucAusrichtung & DLG_MITTEHORIZONTAL) ptDialog.y = rcRect.top + (rcRect.bottom - rcRect.top) / 2 - Height(lTemp) / 2;
-			NeueFensterPosition(ptDialog);
+			if(ucAlignment & DLG_LEFT) ptDialog.x = rcRect.left;
+			if(ucAlignment & DLG_RIGHT) ptDialog.x = rcRect.right - Width(lTemp);
+			if(ucAlignment & DLG_TOP) ptDialog.y = rcRect.top;
+			if(ucAlignment & DLG_BOTTOM) ptDialog.y = rcRect.bottom - Height(lTemp);
+			if(ucAlignment & DLG_CENTERVERTICAL) ptDialog.x = rcRect.left + (rcRect.right - rcRect.left) / 2 - Width(lTemp) / 2;
+			if(ucAlignment & DLG_CENTERHORIZONTAL) ptDialog.y = rcRect.top + (rcRect.bottom - rcRect.top) / 2 - Height(lTemp) / 2;
+			NewWindowPosition(ptDialog);
 		}
 
 		if(bModal){
@@ -305,7 +269,7 @@ long __vectorcall RePag::DirectX::CODialog::SetzSichtbar(bool bSichtbar, unsigne
 
 		MSG msg; HACCEL hAccelerator = Accelerator(); dwThreadID = GetCurrentThreadId();
 		if(hWndErstes == hWndElement){
-			PostMessage(hWndElement, WM_COMMAND, IDE_DLG_SICHTBAR, NULL);
+			PostMessage(hWndElement, WM_COMMAND, IDE_DLG_VISIBLE, NULL);
 			while(GetMessage(&msg, nullptr, NULL, NULL)){ if(!TranslateAccelerator(msg.hwnd, hAccelerator, &msg)){ TranslateMessage(&msg); DispatchMessage(&msg); } }
 		}
 		else{
@@ -316,7 +280,7 @@ long __vectorcall RePag::DirectX::CODialog::SetzSichtbar(bool bSichtbar, unsigne
 			}
 			vthlThreadId->ThIteratorEnd();
 			if(pElement) ((CODialog*)pElement)->ThreadSafe_End();
-			PostMessage(hWndElement, WM_COMMAND, IDE_DLG_SICHTBAR, NULL);
+			PostMessage(hWndElement, WM_COMMAND, IDE_DLG_VISIBLE, NULL);
 			while(GetMessage(&msg, nullptr, NULL, NULL)){
 				if(msg.message == WM_COMMAND) WM_Command_Dialog(WM_COMMAND, msg.wParam, msg.lParam);
 				else{ if(!TranslateAccelerator(msg.hwnd, hAccelerator, &msg)){ TranslateMessage(&msg); DispatchMessage(&msg); } }
@@ -330,30 +294,30 @@ long __vectorcall RePag::DirectX::CODialog::SetzSichtbar(bool bSichtbar, unsigne
 		}
 		ShowWindow(hWndElement, SW_HIDE);
 	}
-	else{ lRuckgabe = lRuckgabeA; PostThreadMessage(dwThreadID, WM_QUIT, NULL, NULL); }
-	return lRuckgabe;
+	else{ lReturn = lReturnA; PostThreadMessage(dwThreadID, WM_QUIT, NULL, NULL); }
+	return lReturn;
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::Schliessen(void)
+void __vectorcall RePag::DirectX::CODialog::Close(void)
 {
 	PostMessage(hWndElement, WM_CLOSE, NULL, NULL);
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::Icon(long lIcon)
+void __vectorcall RePag::DirectX::CODialog::Icon(_In_ long lIcon)
 {
 	if(hWndElement) SetClassLongPtr(hWndElement, GCLP_HICON, lIcon);
-	else vstFensterBau->wndKlasse.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(lIcon));
+	else vstWindowConstraction->wndClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(lIcon));
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::IconSm(long lIconSm)
+void __vectorcall RePag::DirectX::CODialog::IconSm(_In_ long lIconSm)
 {
 	if(hWndElement) SetClassLongPtr(hWndElement, GCLP_HICONSM, lIconSm);
-	else vstFensterBau->wndKlasse.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(lIconSm));
+	else vstWindowConstraction->wndClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(lIconSm));
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::Menu(long lMenu)
+void __vectorcall RePag::DirectX::CODialog::Menu(_In_ long lMenu)
 {
 	if(hWndElement) SetClassLongPtr(hWndElement, GCLP_MENUNAME, lMenu);
-	else vstFensterBau->wndKlasse.lpszMenuName = MAKEINTRESOURCE(lMenu);
+	else vstWindowConstraction->wndClass.lpszMenuName = MAKEINTRESOURCE(lMenu);
 }
 //---------------------------------------------------------------------------------------------------------------------------------------

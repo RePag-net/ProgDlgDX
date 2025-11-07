@@ -29,16 +29,16 @@ SOFTWARE.
 #pragma comment(lib, "CompSys")
 #pragma comment(lib, "ADT")
 
-void __vectorcall RePagPrgDX_Start(void);
-void __vectorcall RePagPrgDX_Ende(void);
+void __vectorcall RePagPrgDX_Begin(void);
+void __vectorcall RePagPrgDX_End(void);
 //------------------------------------------------------------------------------------------------------------------------------------------
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ulreason, LPVOID lpReserved)
 {
   switch(ulreason){
-		case DLL_PROCESS_ATTACH: RePagPrgDX_Start(); break;
+		case DLL_PROCESS_ATTACH: RePagPrgDX_Begin(); break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH: break;
-    case DLL_PROCESS_DETACH: RePagPrgDX_Ende(); break;
+    case DLL_PROCESS_DETACH: RePagPrgDX_End(); break;
   }
   return true;
 }

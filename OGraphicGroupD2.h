@@ -34,28 +34,26 @@ namespace RePag
 		//---------------------------------------------------------------------------------------------------------------------------------------
 		class __declspec(dllexport) COGraphicGroup : public COGraphic
 		{
-			friend LRESULT CALLBACK WndProc_GraphicGroup(HWND hWnd, unsigned int uiMessage, WPARAM wParam, LPARAM lParam);
-			friend DWORD WINAPI thWM_Command_GraphicGroup(void* pvParam);
+      friend LRESULT CALLBACK WndProc_GraphicGroup(_In_ HWND hWnd, _In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam);
+      friend DWORD WINAPI thWM_Command_GraphicGroup(_In_ void* pvParam);
 
-		private:
-			void __vectorcall WM_Paint(void);
-			void __vectorcall WM_Command_GrafikGruppe(unsigned int uiMessage, WPARAM wParam, LPARAM lParam);
+      private:
+      void __vectorcall WM_Paint(void);
+      void __vectorcall WM_Command_GrafikGruppe(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
-		protected:
+      protected:
 
-		public:
-			void __vectorcall COGraphicGroupV(_In_ const VMEMORY vmMemory, _In_ const char* pcWindowName, _In_ unsigned int uiDElementA,
-																				_In_ STDeviceResources* pstDeviceResourcesA);
-			void __vectorcall ErstellFensterInRahmen(COGraphic* pGraphic);
-			void __vectorcall ErstellFensterInGruppe(COGraphic* pGraphic, long lHolHeightAheA, long lWidthA, long lPos_x, long lPos_y);
-			void(__vectorcall* pfnWM_Paint)(COGraphicGroup*, PAINTSTRUCT&);
-			void(__vectorcall* pfnWM_Command)(HWND, unsigned int, WPARAM, LPARAM);
-			void __vectorcall SetzSichtbar(bool bSichtbar);
-		};
+      public:
+      void __vectorcall COGraphicGroupV(_In_ const VMEMORY vmMemory, _In_ const char* pcWindowName, _In_ unsigned int uiDElementA,
+                                        _In_ STDeviceResources* pstDeviceResourcesA);
+      void __vectorcall CreteWindowInGroup(_In_ COGraphic* pGraphic, _In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y);
+      void(__vectorcall* pfnWM_Command)(_In_ HWND, _In_ unsigned int, _In_ WPARAM, _In_ LPARAM);
+      void __vectorcall SetVisible(_In_ bool bVisible);
+    };
 		//---------------------------------------------------------------------------------------------------------------------------------------
-		__declspec(dllexport) COGraphicGroup* __vectorcall COGrafikGruppeV(_In_ const char* pcWindowName, _In_ unsigned int uiIDElement, _In_ STDeviceResources* pstDeviceResourcesA);
-		__declspec(dllexport) COGraphicGroup* __vectorcall COGrafikGruppeV(_In_ const VMEMORY vmMemory, _In_ const char* pcWindowName, _In_ unsigned int uiIDElement,
+		__declspec(dllexport) COGraphicGroup* __vectorcall COGraphicGroupV(_In_ const char* pcWindowName, _In_ unsigned int uiIDElement, _In_ STDeviceResources* pstDeviceResourcesA);
+		__declspec(dllexport) COGraphicGroup* __vectorcall COGraphicGroupV(_In_ const VMEMORY vmMemory, _In_ const char* pcWindowName, _In_ unsigned int uiIDElement,
 																																			 _In_ STDeviceResources* pstDeviceResourcesA);
+  };
 		//---------------------------------------------------------------------------------------------------------------------------------------
-	}
 }

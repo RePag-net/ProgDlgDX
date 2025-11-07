@@ -34,30 +34,30 @@ namespace RePag
 		//---------------------------------------------------------------------------------------------------------------------------------------
 		class __declspec(dllexport) COGraphic : public COElement
 		{
-		private:
-			struct STFensterBau
-			{
-				VMBLOCK vbKlassenName;
-				COStringA asFensterName;
-				DWORD dwFensterStil;
-				DWORD dwErweitertStil;
-				unsigned int uiIDElement;
-			};
-			STFensterBau* vstFensterBau;
+      private:
+      struct STWindowConstraction
+      {
+        VMBLOCK vbClassName;
+        COStringA asWindowName;
+        DWORD dwWindowStyle;
+        DWORD dwExtendStyle;
+        unsigned int uiIDElement;
+      };
+      STWindowConstraction* vstWindowConstraction;
 
-		protected:
-		void __vectorcall COGraphicV(_In_ const VMEMORY vmMemory, _In_ const char* pcClassName, _In_ const char* pcWindowName, _In_ unsigned int uiElementA,
-																 _In_ STDeviceResources* pstDeviceResourcesA);
-		HANDLE heRender;
+      protected:
+      void __vectorcall COGraphicV(_In_ const VMEMORY vmMemory, _In_ const char* pcClassName, _In_ const char* pcWindowName, _In_ unsigned int uiElementA,
+                                   _In_ STDeviceResources* pstDeviceResourcesA);
+      HANDLE heRender;
 
-		public:
-			VMEMORY __vectorcall COFreiV(void);
-			void __vectorcall FensterStil(DWORD dwFensterStilA);
-			void __vectorcall ErweitertStil(DWORD dwErweitertStilA);
-			void __vectorcall CreateWindowGraphic(HWND hWndMain, long lHeightA, long lWidthA, long lPos_x, long lPos_y);
-			unsigned int __vectorcall IDElement(void);
-			void __vectorcall SetVisible(bool bVisible);
-			bool __vectorcall Visible(void);
+      public:
+      VMEMORY __vectorcall COFreiV(void);
+      void __vectorcall WindowStyle(_In_ DWORD dwWindowStyleA);
+      void __vectorcall ExtendStyle(_In_ DWORD dwExtendStyleA);
+      void __vectorcall CreateWindowGraphic(_In_ HWND hWndMain, _In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y);
+      unsigned int __vectorcall IDElement(void);
+      void __vectorcall SetVisible(_In_ bool bVisible);
+      bool __vectorcall Visible(void);
 		};
 		//---------------------------------------------------------------------------------------------------------------------------------------
 	}

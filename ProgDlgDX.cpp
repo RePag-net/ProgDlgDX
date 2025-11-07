@@ -38,16 +38,13 @@ HANDLE htqTimerQueue;
 COList* vthlWndKlassen;
 HANDLE heWndKlassen;
 HANDLE hthWndKlassen;
-STTHWndKlassen thstWndKlassen;
+STTHWndClass thstWndClass;
 COList* vthlDialoge;
 COList* vthlThreadId;
-char pcRePag_GraphicGroup[] = "RePag_GrafikGruppe";
+char pcRePag_GraphicGroup[] = "RePag_GraphicGroup";
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePagPrgDX_Start(void)
+void __vectorcall RePagPrgDX_Begin(void)
 {
-  //SYSTEM_INFO stSystem_Info; GetSystemInfo(&stSystem_Info);
-  //CPUID(stSystem_Info);
-
   ULONG ulMinimumWorkingSetSize, ulMaximumWorkingSetSize;
   HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, GetCurrentProcessId());
   ulMinimumWorkingSetSize = 12288000; ulMaximumWorkingSetSize = 20480000;
@@ -55,22 +52,22 @@ void __vectorcall RePagPrgDX_Start(void)
 
   vmDialog = InitVirtualMem(true, "Dialoge");
 
-  WNDCLASSEX wndKlasse;
-  wndKlasse.cbSize = sizeof(WNDCLASSEX);
-  wndKlasse.style = CS_OWNDC;
-  wndKlasse.cbClsExtra = 0;
-  wndKlasse.cbWndExtra = 16;
-  wndKlasse.hInstance = NULL;
-  wndKlasse.hIcon = NULL;
-  wndKlasse.hCursor = LoadCursor(NULL, IDC_ARROW);
-  wndKlasse.hbrBackground = NULL;
-  wndKlasse.lpszMenuName = NULL;
-  wndKlasse.hIconSm = NULL;
-  wndKlasse.lpszClassName = pcRePag_GraphicGroup;
-  wndKlasse.lpfnWndProc = WndProc_GraphicGroup;
-  RegisterClassEx(&wndKlasse);
+  WNDCLASSEX wndClass;
+  wndClass.cbSize = sizeof(WNDCLASSEX);
+  wndClass.style = CS_OWNDC;
+  wndClass.cbClsExtra = 0;
+  wndClass.cbWndExtra = 16;
+  wndClass.hInstance = NULL;
+  wndClass.hIcon = NULL;
+  wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+  wndClass.hbrBackground = NULL;
+  wndClass.lpszMenuName = NULL;
+  wndClass.hIconSm = NULL;
+  wndClass.lpszClassName = pcRePag_GraphicGroup;
+  wndClass.lpfnWndProc = WndProc_GraphicGroup;
+  RegisterClassEx(&wndClass);
 
-  hInstance = wndKlasse.hInstance;
+  hInstance = wndClass.hInstance;
 
   ACCEL accel7[7];
   accel7[0].fVirt = FVIRTKEY | FCONTROL;
@@ -107,16 +104,16 @@ void __vectorcall RePagPrgDX_Start(void)
   vthlDialoge = COListV(vmDialog, true);
   vthlThreadId = COListV(vmDialog, true);
   vthlWndKlassen = COListV(true);
-  InitializeCriticalSectionAndSpinCount(&thstWndKlassen.csWndKlasse, 1000);
-  thstWndKlassen.bAbbruch = false;
+  InitializeCriticalSectionAndSpinCount(&thstWndClass.csWndClass, 1000);
+  thstWndClass.bBreak = false;
   heWndKlassen = CreateEvent(NULL, false, false, NULL);
-  hthWndKlassen = CreateThread(NULL, 0, thLoschWndKlassen, &thstWndKlassen, CREATE_SUSPENDED, NULL);
+  hthWndKlassen = CreateThread(NULL, 0, thDeleteWndClass, &thstWndClass, CREATE_SUSPENDED, NULL);
   if(hthWndKlassen){ SetThreadPriority(hthWndKlassen, THREAD_PRIORITY_IDLE); ResumeThread(hthWndKlassen); }
 
   CoInitialize(NULL);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePagPrgDX_Ende(void)
+void __vectorcall RePagPrgDX_End(void)
 {
   CoUninitialize();
 
@@ -124,9 +121,9 @@ void __vectorcall RePagPrgDX_Ende(void)
   DeleteTimerQueueEx(htqTimerQueue, INVALID_HANDLE_VALUE);
   UnregisterClass(pcRePag_GraphicGroup, hInstance);
 
-  EnterCriticalSection(&thstWndKlassen.csWndKlasse);
-  thstWndKlassen.bAbbruch = true;
-  LeaveCriticalSection(&thstWndKlassen.csWndKlasse);
+  EnterCriticalSection(&thstWndClass.csWndClass);
+  thstWndClass.bBreak = true;
+  LeaveCriticalSection(&thstWndClass.csWndClass);
 
   SetEvent(heWndKlassen);
   Sleep(500);
@@ -156,46 +153,46 @@ HANDLE __vectorcall RePag::DirectX::TimerQueue(void)
   return htqTimerQueue;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::Cursorform(const char* pcCursor)
+void __vectorcall RePag::DirectX::Cursorform(_In_ const char* pcCursor)
 {
   (pcCursor == NULL ? SetCursor(NULL) : SetCursor(LoadCursor(hInstance, pcCursor)));
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::EinfugenKurzTasten(const ACCEL* pacTasten, int iAnzahl)
+void __vectorcall RePag::DirectX::InsertAccelerator(_In_ const ACCEL* pacTasten, _In_ int iNumber)
 {
   int iKurzTasten = CopyAcceleratorTable(hAccelerator, NULL, 0);
-  ACCEL* vacTasten = (ACCEL*)malloc(sizeof(ACCEL) * (iKurzTasten + iAnzahl));
+  ACCEL* vacTasten = (ACCEL*)malloc(sizeof(ACCEL) * (iKurzTasten + iNumber));
   CopyAcceleratorTable(hAccelerator, vacTasten, iKurzTasten);
   DestroyAcceleratorTable(hAccelerator);
-  MemCopy(&vacTasten[iKurzTasten], pacTasten, sizeof(ACCEL) * iAnzahl);
-  hAccelerator = CreateAcceleratorTable(vacTasten, iKurzTasten + iAnzahl);
+  MemCopy(&vacTasten[iKurzTasten], pacTasten, sizeof(ACCEL) * iNumber);
+  hAccelerator = CreateAcceleratorTable(vacTasten, iKurzTasten + iNumber);
   free(vacTasten);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall LoschWndKlasse(ATOM atWndKlasse)
+void __vectorcall DeleteWndClass(_In_ ATOM atWndClass)
 {
-  ATOM* patWndKlasse = (ATOM*)VMBlock(2); MemCopy(patWndKlasse, &atWndKlasse, 2);
+  ATOM* patWndKlasse = (ATOM*)VMBlock(2); MemCopy(patWndKlasse, &atWndClass, 2);
   vthlWndKlassen->ThToEnd(patWndKlasse);
   SetEvent(heWndKlassen);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-DWORD WINAPI thLoschWndKlassen(void* pvParam)
+DWORD WINAPI thDeleteWndClass(void* pvParam)
 {
   void* pvIterator;
-  TryEnterCriticalSection(&thstWndKlassen.csWndKlasse);
-  while(!((STTHWndKlassen*)pvParam)->bAbbruch){
-    LeaveCriticalSection(&thstWndKlassen.csWndKlasse);
+  TryEnterCriticalSection(&thstWndClass.csWndClass);
+  while(!((STTHWndClass*)pvParam)->bBreak){
+    LeaveCriticalSection(&thstWndClass.csWndClass);
     pvIterator = vthlWndKlassen->ThIteratorToBegin_Lock();
     while(pvIterator){
       if(UnregisterClass(MAKEINTATOM(*((ATOM*)vthlWndKlassen->Element(pvIterator))), hInstance)) vthlWndKlassen->DeleteFirstElement(pvIterator, true);
     }
     vthlWndKlassen->ThIteratorEnd();
     WaitForSingleObject(heWndKlassen, INFINITE);
-    TryEnterCriticalSection(&thstWndKlassen.csWndKlasse);
+    TryEnterCriticalSection(&thstWndClass.csWndClass);
   }
 
-  LeaveCriticalSection(&thstWndKlassen.csWndKlasse);
-  DeleteCriticalSection(&thstWndKlassen.csWndKlasse);
+  LeaveCriticalSection(&thstWndClass.csWndClass);
+  DeleteCriticalSection(&thstWndClass.csWndClass);
   CloseHandle(heWndKlassen);
   vthlWndKlassen->ThDeleteList(false);
   VMFreiV(vthlWndKlassen);

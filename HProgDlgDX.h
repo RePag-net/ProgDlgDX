@@ -47,12 +47,12 @@ __declspec(dllimport) void __vectorcall RePag::System::DeleteEvent(HANDLE hEreig
 using namespace RePag::DirectX;
 
 //-------------------------------------------------------------------------------------------------------------------------------------------
-typedef struct STTHWndKlassen
+typedef struct STTHWndClass
 {
-  bool bAbbruch;
-  CRITICAL_SECTION csWndKlasse;
-} STTHWndKlassen;
-DWORD WINAPI thLoschWndKlassen(void* pvParam);
+  bool bBreak;
+  CRITICAL_SECTION csWndClass;
+} STTHWndClass;
+DWORD WINAPI thDeleteWndClass(void* pvParam);
 //-------------------------------------------------------------------------------------------------------------------------------------------
 typedef struct STThreadId
 {
@@ -67,8 +67,7 @@ extern VMEMORY vmDialog;
 extern HANDLE htqTimerQueue;
 extern char pcRePag_GraphicGroup[];
 //-------------------------------------------------------------------------------------------------------------------------------------------
-//void __vectorcall CPUID(SYSTEM_INFO& stSystem_Info);
-void __vectorcall LoschWndKlasse(ATOM atWndKlasse);
+void __vectorcall DeleteWndClass(ATOM atWndClass);
 //-------------------------------------------------------------------------------------------------------------------------------------------
 namespace RePag
 {
@@ -80,7 +79,7 @@ namespace RePag
     __declspec(dllexport) HACCEL __vectorcall Accelerator(void);
     __declspec(dllexport) HANDLE __vectorcall TimerQueue(void);
     __declspec(dllexport) void __vectorcall Cursorform(const char* pcCursor);
-    __declspec(dllexport) void __vectorcall EinfugenKurzTasten(const ACCEL* pacTasten, int iAnzahl);
+    __declspec(dllexport) void __vectorcall InsertAccelerator(const ACCEL* pacTasten, int iAnzahl);
     __declspec(dllexport) HRESULT __vectorcall CreateDeviceIndependentResources(_Out_ STDeviceResources* pstDeviceResources);
     __declspec(dllexport) HRESULT __vectorcall CreateDeviceResources(_Out_ STDeviceResources* pstDeviceResources);
     //---------------------------------------------------------------------------------------------------------------------------------------

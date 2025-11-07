@@ -26,43 +26,16 @@ SOFTWARE.
 ******************************************************************************/
 #include "HProgDlgDX.h"
 #include "OElementD2.h"
-//-----------------------------------------------------------------------------------------------------------------------------------------
-#define _rcZeichnen_left eax
-#define _rcZeichnen_top eax + 4
-#define _rcZeichnen_right eax + 8
-#define _rcZeichnen_bottom eax + 12
-#define _stDIBSection_dsBmih_biBitCount edx + 38
-#define _stDIBSection_dsBmih_biWidth edx + 28
-#define _stDIBSection_dsBmih_biHeight edx + 32
-#define _stDIBSection_dsBm_bmBits edx + 20
-#define _rcEffektrand_links eax + rcEffektrand + 0 
-#define _rcEffektrand_oben eax + rcEffektrand + 4
-#define _rcEffektrand_rechts eax + rcEffektrand + 8
-#define _rcEffektrand_unten eax + rcEffektrand + 12
-#define _stHintergrundeffektfarbe eax + stHintergrundeffektfarbe
-
-#define HGE_KEINHINTERGRUND 0
-#define HGE_HINTERGRUND 1
-#define HGE_BELEUCHTUNG_H 2
-#define HGE_BELEUCHTUNG_V 4
-#define HGE_RAND_H 8
-#define HGE_RAND_V 16
 //------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::COElementV(_In_ const VMEMORY vmMemoryA, _In_ STDeviceResources* pstDeviceResourcesA)
 {
 	vmMemory = vmMemoryA;
 	pstDeviceResources = pstDeviceResourcesA;
-	bHintergrund = true;
 	hWndElement = nullptr;
-	hbmBild = nullptr;
-	htEffekt_Timer = nullptr;
+	htEffect_Timer = nullptr;
 	crfBackground = D2D1::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
-	ucHintergrundeffekt = HGE_HINTERGRUND;
-	crfBackgroundEffect = D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f);
-	rcEffektrand.left = rcEffektrand.right = rcEffektrand.top = rcEffektrand.bottom = 0;
-	//ucRahmenbreite = 0;
 
-	stThread.ucFunktion = stThread.dwAktiv = stThread.ucWarten = 0; stThread.dwHaupt = stThread.dwAktiv = GetCurrentThreadId();
+	stThread.ucFunction = stThread.dwActiv = stThread.ucWait = 0; stThread.dwMain = stThread.dwActiv = GetCurrentThreadId();
 	stThread.heElement[0] = CreateEvent(nullptr, false, true, nullptr); stThread.heElement[1] = CreateEvent(nullptr, false, false, nullptr);
 
 	pfnWM_Size = nullptr;
@@ -77,7 +50,6 @@ void __vectorcall RePag::DirectX::COElement::COElementV(_In_ const VMEMORY vmMem
 //-----------------------------------------------------------------------------------------------------------------------------------------
 VMEMORY __vectorcall RePag::DirectX::COElement::COFreiV(void)
 {
-	if(hbmBild) DeleteObject(hbmBild);
 	CloseHandle(stThread.heElement[0]); CloseHandle(stThread.heElement[1]);
 
 	SafeRelease(&ifD2D1Context6);
@@ -96,8 +68,7 @@ void __vectorcall RePag::DirectX::COElement::CreateWindowSizeDependentResources(
 	if(ifDXGISwapChain4 != nullptr){
 
 		ifD2D1Context6->SetTarget(nullptr);
-		SafeRelease(&ifd2dBitmap1); ifd2dBitmap1 = nullptr;
-		SafeRelease(&ifDXGIBackBuffer); ifDXGIBackBuffer = nullptr;
+		SafeRelease(&ifd2dBitmap1);	SafeRelease(&ifDXGIBackBuffer);
 
 		ifDXGISwapChain4->ResizeBuffers(0, 0, 0, dxgi_Format, NULL);
 	}
@@ -139,7 +110,7 @@ void __vectorcall RePag::DirectX::COElement::CreateWindowSizeDependentResources(
 	ifD2D1Context6->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_DEFAULT);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::WM_Create_Element(HWND hWnd)
+void __vectorcall RePag::DirectX::COElement::WM_Create_Element(_In_ HWND hWnd)
 {
 	hWndElement = hWnd;
 
@@ -153,7 +124,7 @@ void __vectorcall RePag::DirectX::COElement::WM_Create_Element(HWND hWnd)
 	ifD2D1Context6->CreateSolidColorBrush(crfBackground, &ifBackColor);	ifBackColor->SetColor(crfBackground);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::WM_Size_Element(HWND hWnd, LPARAM lParam)
+void __vectorcall RePag::DirectX::COElement::WM_Size_Element(_In_ HWND hWnd, _In_ LPARAM lParam)
 {
 	ThreadSafe_Begin();
 	static UINT uiHeight = 0, uiWidth = 0;
@@ -174,7 +145,7 @@ HWND __vectorcall RePag::DirectX::COElement::HWND_Main(void)
 	return GetParent(hWndElement);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-long& __vectorcall RePag::DirectX::COElement::Width(long& lWidthA)
+long& __vectorcall RePag::DirectX::COElement::Width(_Out_ long& lWidthA)
 {
 	ThreadSafe_Begin();
 	lWidthA = lWidth;
@@ -182,7 +153,7 @@ long& __vectorcall RePag::DirectX::COElement::Width(long& lWidthA)
 	return lWidthA;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-long& __vectorcall RePag::DirectX::COElement::Height(long& lHeightA)
+long& __vectorcall RePag::DirectX::COElement::Height(_Out_ long& lHeightA)
 {
 	ThreadSafe_Begin();
 	lHeightA = lHeight;
@@ -190,7 +161,7 @@ long& __vectorcall RePag::DirectX::COElement::Height(long& lHeightA)
 	return lHeightA;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-long& __vectorcall RePag::DirectX::COElement::Pos_X(long& lPos_x)
+long& __vectorcall RePag::DirectX::COElement::Pos_X(_Out_ long& lPos_x)
 {
 	ThreadSafe_Begin();
 	lPos_x = ptPosition.x;
@@ -198,7 +169,7 @@ long& __vectorcall RePag::DirectX::COElement::Pos_X(long& lPos_x)
 	return lPos_x;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-long& __vectorcall RePag::DirectX::COElement::Pos_Y(long& lPos_y)
+long& __vectorcall RePag::DirectX::COElement::Pos_Y(_Out_ long& lPos_y)
 {
 	ThreadSafe_Begin();
 	lPos_y = ptPosition.y;
@@ -206,7 +177,7 @@ long& __vectorcall RePag::DirectX::COElement::Pos_Y(long& lPos_y)
 	return lPos_y;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-POINT& __vectorcall RePag::DirectX::COElement::Position(POINT& ptPositionA)
+POINT& __vectorcall RePag::DirectX::COElement::Position(_Out_ POINT& ptPositionA)
 {
 	ThreadSafe_Begin();
 	ptPositionA = ptPosition;
@@ -214,18 +185,18 @@ POINT& __vectorcall RePag::DirectX::COElement::Position(POINT& ptPositionA)
 	return ptPositionA;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-RECT& __vectorcall RePag::DirectX::COElement::Fenster(RECT& rcFenster)
+RECT& __vectorcall RePag::DirectX::COElement::Window(_Out_ RECT& rcWindow)
 {
 	ThreadSafe_Begin();
-	rcFenster.left = ptPosition.x;
-	rcFenster.top = ptPosition.y;
-	rcFenster.right = ptPosition.x + lWidth;
-	rcFenster.bottom = ptPosition.y + lHeight;
+	rcWindow.left = ptPosition.x;
+	rcWindow.top = ptPosition.y;
+	rcWindow.right = ptPosition.x + lWidth;
+	rcWindow.bottom = ptPosition.y + lHeight;
 	ThreadSafe_End();
-	return rcFenster;
+	return rcWindow;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeueFensterPosition(long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::COElement::NewWindowPosition(_In_ long lPos_x, _In_ long lPos_y)
 {
 	ThreadSafe_Begin();
 	ptPosition.x = lPos_x; ptPosition.y = lPos_y;
@@ -234,7 +205,7 @@ void __vectorcall RePag::DirectX::COElement::NeueFensterPosition(long lPos_x, lo
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeueFensterPosition(POINT& ptPositionA)
+void __vectorcall RePag::DirectX::COElement::NewWindowPosition(_In_ POINT& ptPositionA)
 {
 	ThreadSafe_Begin();
 	ptPosition = ptPositionA;
@@ -243,57 +214,57 @@ void __vectorcall RePag::DirectX::COElement::NeueFensterPosition(POINT& ptPositi
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeueFensterGrosse(long lHeightA, long lWidthA)
+void __vectorcall RePag::DirectX::COElement::NewWindowSize(_In_ long lHeightA, _In_ long lWidthA)
 {
 	ThreadSafe_Begin();
 	lHeight = lHeightA; lWidth = lWidthA;
 
-	InvalidateRect(hWndElement, nullptr, false);
 	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
+	CreateWindowSizeDependentResources();
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeueFensterHohe(long lHeightA)
+void __vectorcall RePag::DirectX::COElement::NewWindowHeight(_In_ long lHeightA)
 {
 	ThreadSafe_Begin();
 	lHeight = lHeightA;
 
-	InvalidateRect(hWndElement, nullptr, false);
 	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
+	CreateWindowSizeDependentResources();
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeueFensterBreite(long lWidthA)
+void __vectorcall RePag::DirectX::COElement::NewWindowWidth(_In_ long lWidthA)
 {
 	ThreadSafe_Begin();
 	lWidth = lWidthA;
 
-	InvalidateRect(hWndElement, nullptr, false);
 	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
+	CreateWindowSizeDependentResources();
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::NeuesFenster(long lHeightA, long lWidthA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::COElement::NewWindow(_In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y)
 {
 	ThreadSafe_Begin();
 	lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
-	InvalidateRect(hWndElement, nullptr, false);
 	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
+	CreateWindowSizeDependentResources();
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::AndernFensterGrosse(long lHeightA, long lWidthA)
+void __vectorcall RePag::DirectX::COElement::ChangeWindowSize(_In_ long lHeightA, _In_ long lWidthA)
 {
 	ThreadSafe_Begin();
 	lHeight += lHeightA; lWidth += lWidthA;
 
-	InvalidateRect(hWndElement, nullptr, false);
 	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
+	CreateWindowSizeDependentResources();
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::AndernFensterPosition(long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::COElement::ChangeWindowPosition(_In_ long lPos_x, _In_ long lPos_y)
 {
 	ThreadSafe_Begin();
 	ptPosition.x += lPos_x; ptPosition.y += lPos_y;
@@ -302,47 +273,6 @@ void __vectorcall RePag::DirectX::COElement::AndernFensterPosition(long lPos_x, 
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::SetzHintergrund(bool bMitHintergrund)
-{
-	if(!hWndElement) bHintergrund = bMitHintergrund;
-	else{
-		ThreadSafe_Begin();
-		if(bHintergrund && !bMitHintergrund){ bHintergrund = bMitHintergrund; DeleteObject(hbmBild); hbmBild = nullptr; }
-		else if(!bHintergrund && bMitHintergrund){
-			bHintergrund = bMitHintergrund; RECT rcClient; GetClientRect(hWndElement, &rcClient);
-			WM_Size_Element(hWndElement, MAKELPARAM(rcClient.right, rcClient.bottom));
-			//UpdateFenster(nullptr, true, true);
-		}
-		ThreadSafe_End();
-	}
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::SetzVerfugbar(bool bVerfugbar)
-{
-	EnableWindow(hWndElement, bVerfugbar);
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
-bool __vectorcall RePag::DirectX::COElement::Verfugbar(void)
-{
-	return IsWindowEnabled(hWndElement);
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::Loschen(void)
-{
-	DestroyWindow(hWndElement);
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
-//void __vectorcall RePag::DirectX::COElement::UpdateFenster(RECT* prcFenster, bool bUpdateHintergrund, bool bUpdateHintergrundeffekt)
-//{
-//	if(hWndElement){
-//		ThreadSafe_Begin();
-//		if(bUpdateHintergrundeffekt && hbmBild) Hintergrund_Effekt(prcFenster);
-//		if(bUpdateHintergrund && hbmBild) bHintergrund = true;
-//		InvalidateRect(hWndElement, prcFenster, false); UpdateWindow(hWndElement);
-//		ThreadSafe_End();
-//	}
-//}
-////-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ unsigned char ucAlpha)
 {
 	ThreadSafe_Begin();
@@ -359,25 +289,18 @@ void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ D2D1_COLOR_
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::GetBackgroundColor(_In_ D2D1_COLOR_F& crfBackgroundA)
+void __vectorcall RePag::DirectX::COElement::GetBackgroundColor(_Out_ D2D1_COLOR_F& crfBackgroundA)
 {
 	ThreadSafe_Begin();
 	crfBackgroundA = crfBackground;
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::Hintergrundeffekt(unsigned char ucEffekt)
+void __vectorcall RePag::DirectX::COElement::Effect_Timer(_In_ bool bStart, _In_ unsigned long ulInterval_msek, _In_ void CALLBACK fnEffect_Timer(COElement*, bool bTimerOrWaitFired))
 {
 	ThreadSafe_Begin();
-	ucHintergrundeffekt = ucEffekt;
-	ThreadSafe_End();
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::Effekt_Timer(bool bStarten, unsigned long ulInterval_msek, void CALLBACK fnEffekt_Timer(COElement*, bool bTimerOrWaitFired))
-{
-	ThreadSafe_Begin();
-	if(bStarten && !htEffekt_Timer) CreateTimerQueueTimer(&htEffekt_Timer, htqTimerQueue, (WAITORTIMERCALLBACK)fnEffekt_Timer, this, 0, ulInterval_msek, WT_EXECUTEINPERSISTENTTHREAD);
-	else if(!bStarten && htEffekt_Timer){ DeleteTimerQueueTimer(htqTimerQueue, htEffekt_Timer, INVALID_HANDLE_VALUE); htEffekt_Timer = nullptr; }
+	if(bStart && !htEffect_Timer) CreateTimerQueueTimer(&htEffect_Timer, htqTimerQueue, (WAITORTIMERCALLBACK)fnEffect_Timer, this, 0, ulInterval_msek, WT_EXECUTEINPERSISTENTTHREAD);
+	else if(!bStart && htEffect_Timer){ DeleteTimerQueueTimer(htqTimerQueue, htEffect_Timer, INVALID_HANDLE_VALUE); htEffect_Timer = nullptr; }
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -385,23 +308,23 @@ inline void __vectorcall RePag::DirectX::COElement::ThreadSafe_Begin(void)
 {
 	WaitForSingleObjectEx(stThread.heElement[0], INFINITE, false);
 	DWORD dwThreadID = GetCurrentThreadId();
-	if(!stThread.ucFunktion) stThread.dwAktiv = dwThreadID;
-	else if(stThread.dwAktiv != dwThreadID){
-		if(stThread.dwHaupt != dwThreadID || stThread.dwHaupt == stThread.dwAktiv){
-			stThread.ucWarten++;
+	if(!stThread.ucFunction) stThread.dwActiv = dwThreadID;
+	else if(stThread.dwActiv != dwThreadID){
+		if(stThread.dwMain != dwThreadID || stThread.dwMain == stThread.dwActiv){
+			stThread.ucWait++;
 			SetEvent(stThread.heElement[0]);
 			WaitForMultipleObjectsEx(2, stThread.heElement, true, INFINITE, false);
-			stThread.dwAktiv = dwThreadID;
-			stThread.ucWarten--;
+			stThread.dwActiv = dwThreadID;
+			stThread.ucWait--;
 		}
 	}
-	stThread.ucFunktion++; SetEvent(stThread.heElement[0]);
+	stThread.ucFunction++; SetEvent(stThread.heElement[0]);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 inline void __vectorcall RePag::DirectX::COElement::ThreadSafe_End(void)
 {
 	WaitForSingleObjectEx(stThread.heElement[0], INFINITE, false);
-	if(!--stThread.ucFunktion && stThread.ucWarten)	SetEvent(stThread.heElement[1]);
+	if(!--stThread.ucFunction && stThread.ucWait)	SetEvent(stThread.heElement[1]);
 	SetEvent(stThread.heElement[0]);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
