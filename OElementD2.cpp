@@ -127,9 +127,8 @@ void __vectorcall RePag::DirectX::COElement::WM_Create_Element(_In_ HWND hWnd)
 void __vectorcall RePag::DirectX::COElement::WM_Size_Element(_In_ HWND hWnd, _In_ LPARAM lParam)
 {
 	ThreadSafe_Begin();
-	static UINT uiHeight = 0, uiWidth = 0;
-	if(uiHeight != HIWORD(lParam) || uiWidth != LOWORD(lParam)){
-		uiHeight = HIWORD(lParam); uiWidth = LOWORD(lParam);
+	if(lHeight != HIWORD(lParam) || lWidth != LOWORD(lParam)){
+		lHeight = HIWORD(lParam); lWidth = LOWORD(lParam);
 		CreateWindowSizeDependentResources();
 	}
 	ThreadSafe_End();
