@@ -36,8 +36,8 @@ constexpr BYTE DLG_CENTERVERTICAL = 16;
 constexpr BYTE DLG_CENTERHORIZONTAL = 32;
 constexpr BYTE DLG_MINIMAL = 64;
 constexpr BYTE DLG_MAXIMAL = 128;
-constexpr BYTE IDE_DLG_VISIBLE = 0xFFFF;
-constexpr BYTE IDE_DLG_WM_QUIT = 0xFFFE;
+constexpr BYTE IDE_DLG_VISIBLE = 0xFF;
+constexpr BYTE IDE_DLG_WM_QUIT = 0xFE;
 //-----------------------------------------------------------------------------------------------------------------------------------------
 #define _WM_Command ((STTHWM_CommandDlg*)pvParam)
 //-----------------------------------------------------------------------------------------------------------------------------------------
