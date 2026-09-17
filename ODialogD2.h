@@ -50,6 +50,7 @@ namespace RePag
       long lReturn;
       bool bModal;
       DWORD dwThreadID;
+      void __vectorcall WM_Size(LPARAM lParam);
       void __vectorcall WM_Move_Dialog(void);
       void __vectorcall WM_Paint_Dialog(void);
       void __vectorcall WM_Command_Dialog(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam);

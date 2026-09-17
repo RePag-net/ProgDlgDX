@@ -88,7 +88,7 @@ namespace RePag
 				case WM_SIZE		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 													if(pDialog){
 														pDialog->ThreadSafe_Begin();
-														pDialog->WM_Size_Element(hWnd, lParam);
+														pDialog->WM_Size(lParam);
 														if(pDialog->pfnWM_Size) pDialog->pfnWM_Size(pDialog, wParam, lParam);
 														pDialog->ThreadSafe_End();
 													}
@@ -174,6 +174,17 @@ void __vectorcall RePag::DirectX::CODialog::WM_Create(void)
 	ifD2D1Context6->Clear(crfBackground);
 	ifD2D1Context6->EndDraw();
 	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::WM_Size(LPARAM lParam)
+{
+	ThreadSafe_Begin();
+	if(lHeight != HIWORD(lParam) || lWidth != LOWORD(lParam)){
+		lHeight = HIWORD(lParam); lWidth = LOWORD(lParam);
+
+		CreateWindowSizeDependentResources();
+	}
+	ThreadSafe_End();
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::CODialog::WM_Move_Dialog(void)

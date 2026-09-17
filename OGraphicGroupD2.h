@@ -38,7 +38,7 @@ namespace RePag
       friend DWORD WINAPI thWM_Command_GraphicGroup(_In_ void* pvParam);
 
       private:
-      void __vectorcall WM_Paint(void);
+      void __vectorcall WM_Size(LPARAM lParam);
       void __vectorcall WM_Command_GrafikGruppe(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
       protected:

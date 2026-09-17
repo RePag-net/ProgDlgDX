@@ -35,7 +35,7 @@ void __vectorcall RePag::DirectX::COElement::COElementV(_In_ const VMEMORY vmMem
 	htEffect_Timer = nullptr;
 	crfBackground = D2D1::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
 
-	stThread.ucFunction = stThread.dwActiv = stThread.ucWait = 0; stThread.dwMain = stThread.dwActiv = GetCurrentThreadId();
+	stThread.ucFunction = stThread.dwActive = stThread.ucWait = 0; stThread.dwMain = stThread.dwActive = GetCurrentThreadId();
 	stThread.heElement[0] = CreateEvent(nullptr, false, true, nullptr); stThread.heElement[1] = CreateEvent(nullptr, false, false, nullptr);
 
 	pfnWM_Size = nullptr;
@@ -71,6 +71,7 @@ void __vectorcall RePag::DirectX::COElement::CreateWindowSizeDependentResources(
 		SafeRelease(&ifd2dBitmap1);	SafeRelease(&ifDXGIBackBuffer);
 
 		ifDXGISwapChain4->ResizeBuffers(0, 0, 0, dxgi_Format, NULL);
+    rclDirty.top = 0; rclDirty.left = 0; rclDirty.right = lWidth; rclDirty.bottom = lHeight;
 	}
 	else{
 		pstDeviceResources->ifD2D1Device6->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &ifD2D1Context6);
@@ -87,7 +88,7 @@ void __vectorcall RePag::DirectX::COElement::CreateWindowSizeDependentResources(
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 		swapChainDesc.Flags = NULL;
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED; // DXGI_ALPHA_MODE_IGNORE;
-		swapChainDesc.Scaling = DXGI_SCALING_STRETCH; // DXGI_SCALING_NONE;
+		swapChainDesc.Scaling = DXGI_SCALING_NONE; // DXGI_SCALING_STRETCH;
 
 		IDXGISwapChain1* ifDXGISwapChain1;
 		pstDeviceResources->ifDXGIFactory7->CreateSwapChainForHwnd(pstDeviceResources->ifD311Device5, hWndElement, &swapChainDesc,
@@ -96,8 +97,7 @@ void __vectorcall RePag::DirectX::COElement::CreateWindowSizeDependentResources(
 		ifDXGISwapChain1->QueryInterface(IID_PPV_ARGS(&ifDXGISwapChain4));
 		ifDXGISwapChain1->Release(); ifDXGISwapChain1 = nullptr;
 	}
-
-		D2D1_BITMAP_PROPERTIES1 bitmapProperties =
+	D2D1_BITMAP_PROPERTIES1 bitmapProperties =
 			D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
 															D2D1::PixelFormat(dxgi_Format, D2D1_ALPHA_MODE_PREMULTIPLIED), pstDeviceResources->dpiX, pstDeviceResources->dpiY);
 
@@ -124,16 +124,6 @@ void __vectorcall RePag::DirectX::COElement::WM_Create_Element(_In_ HWND hWnd)
 	ifD2D1Context6->CreateSolidColorBrush(crfBackground, &ifBackColor);	ifBackColor->SetColor(crfBackground);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::WM_Size_Element(_In_ HWND hWnd, _In_ LPARAM lParam)
-{
-	ThreadSafe_Begin();
-	if(lHeight != HIWORD(lParam) || lWidth != LOWORD(lParam)){
-		lHeight = HIWORD(lParam); lWidth = LOWORD(lParam);
-		CreateWindowSizeDependentResources();
-	}
-	ThreadSafe_End();
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
 HWND __vectorcall RePag::DirectX::COElement::HWND_Element(void)
 {
 	return hWndElement;
@@ -199,8 +189,7 @@ void __vectorcall RePag::DirectX::COElement::NewWindowPosition(_In_ long lPos_x,
 {
 	ThreadSafe_Begin();
 	ptPosition.x = lPos_x; ptPosition.y = lPos_y;
-
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, false);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -208,58 +197,43 @@ void __vectorcall RePag::DirectX::COElement::NewWindowPosition(_In_ POINT& ptPos
 {
 	ThreadSafe_Begin();
 	ptPosition = ptPositionA;
-
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, false);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::NewWindowSize(_In_ long lHeightA, _In_ long lWidthA)
 {
 	ThreadSafe_Begin();
-	lHeight = lHeightA; lWidth = lWidthA;
-
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
-	CreateWindowSizeDependentResources();
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidthA, lHeightA, false);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::NewWindowHeight(_In_ long lHeightA)
 {
 	ThreadSafe_Begin();
-	lHeight = lHeightA;
-
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
-	CreateWindowSizeDependentResources();
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeightA, false);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::NewWindowWidth(_In_ long lWidthA)
 {
 	ThreadSafe_Begin();
-	lWidth = lWidthA;
-
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
-	CreateWindowSizeDependentResources();
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidthA, lHeight, false);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::NewWindow(_In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y)
 {
 	ThreadSafe_Begin();
-	lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
-
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
-	CreateWindowSizeDependentResources();
+	ptPosition.x = lPos_x; ptPosition.y = lPos_y;
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidthA, lHeightA, false);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COElement::ChangeWindowSize(_In_ long lHeightA, _In_ long lWidthA)
 {
 	ThreadSafe_Begin();
-	lHeight += lHeightA; lWidth += lWidthA;
-
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
-	CreateWindowSizeDependentResources();
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidthA, lHeightA, false);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -267,15 +241,14 @@ void __vectorcall RePag::DirectX::COElement::ChangeWindowPosition(_In_ long lPos
 {
 	ThreadSafe_Begin();
 	ptPosition.x += lPos_x; ptPosition.y += lPos_y;
-
-	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, IsWindowVisible(hWndElement));
+	MoveWindow(hWndElement, ptPosition.x, ptPosition.y, lWidth, lHeight, false);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ unsigned char ucAlpha)
+void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ float fAlpha)
 {
 	ThreadSafe_Begin();
-	crfBackground =	D2D1::ColorF(RGB(ucBlau, ucGrun, ucRot), ucAlpha);
+	crfBackground =	D2D1::ColorF(RGB(ucBlau, ucGrun, ucRot), fAlpha);
 	if(ifBackColor) ifBackColor->SetColor(crfBackground);
 	ThreadSafe_End();
 }
@@ -307,13 +280,13 @@ inline void __vectorcall RePag::DirectX::COElement::ThreadSafe_Begin(void)
 {
 	WaitForSingleObjectEx(stThread.heElement[0], INFINITE, false);
 	DWORD dwThreadID = GetCurrentThreadId();
-	if(!stThread.ucFunction) stThread.dwActiv = dwThreadID;
-	else if(stThread.dwActiv != dwThreadID){
-		if(stThread.dwMain != dwThreadID || stThread.dwMain == stThread.dwActiv){
+	if(!stThread.ucFunction) stThread.dwActive = dwThreadID;
+	else if(stThread.dwActive != dwThreadID){
+		if(stThread.dwMain != dwThreadID || stThread.dwMain == stThread.dwActive){
 			stThread.ucWait++;
 			SetEvent(stThread.heElement[0]);
 			WaitForMultipleObjectsEx(2, stThread.heElement, true, INFINITE, false);
-			stThread.dwActiv = dwThreadID;
+			stThread.dwActive = dwThreadID;
 			stThread.ucWait--;
 		}
 	}

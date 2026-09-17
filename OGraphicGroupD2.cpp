@@ -83,7 +83,7 @@ namespace RePag
 			COGraphicGroup* pGraphicGroup;
 			switch(uiMessage){
 				case WM_SIZE			: pGraphicGroup = (COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-														if(pGraphicGroup) pGraphicGroup->WM_Size_Element(hWnd, lParam);
+														if(pGraphicGroup) pGraphicGroup->WM_Size(lParam);
 														return NULL;
 				case WM_COMMAND		:	pGraphicGroup = (COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 														if(pGraphicGroup->pfnWM_Command){ pGraphicGroup->WM_Command_GrafikGruppe(uiMessage, wParam, lParam); return NULL; }
@@ -122,6 +122,17 @@ void __vectorcall RePag::DirectX::COGraphicGroup::WM_Command_GrafikGruppe(_In_ u
 void __vectorcall RePag::DirectX::COGraphicGroup::CreteWindowInGroup(COGraphic* pGrafik, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
 	pGrafik->CreateWindowGraphic(hWndElement, lHeightA, lWidthA, lPos_x, lPos_y);
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::WM_Size(LPARAM lParam)
+{
+	ThreadSafe_Begin();
+	if(lHeight != HIWORD(lParam) || lWidth != LOWORD(lParam)){
+		lHeight = HIWORD(lParam); lWidth = LOWORD(lParam);
+
+		CreateWindowSizeDependentResources();
+	}
+	ThreadSafe_End();
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::SetVisible(bool bVisible)
