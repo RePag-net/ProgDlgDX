@@ -155,7 +155,6 @@ void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_z_ const char* pcWindo
 //-----------------------------------------------------------------------------------------------------------------------------------------
 VMEMORY __vectorcall RePag::DirectX::CODialog::COFreiV(void)
 {
-	if(htEffect_Timer) DeleteTimerQueueTimer(htqTimerQueue, htEffect_Timer, INVALID_HANDLE_VALUE);
 	DeleteWndClass(GetClassWord(hWndElement, GCW_ATOM));
 
 	void* pvDialoge = vthlDialoge->ThIteratorToBegin_Lock(); void* pvLoschen = nullptr;
@@ -171,6 +170,7 @@ VMEMORY __vectorcall RePag::DirectX::CODialog::COFreiV(void)
 void __vectorcall RePag::DirectX::CODialog::WM_Create(void)
 {
 	ifD2D1Context6->BeginDraw();
+	if(crfBackground.a == 0.0f) crfBackground.a = 1.0f;
 	ifD2D1Context6->Clear(crfBackground);
 	ifD2D1Context6->EndDraw();
 	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);

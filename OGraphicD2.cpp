@@ -40,13 +40,10 @@ void __vectorcall RePag::DirectX::COGraphic::COGraphicV(_In_ const VMEMORY vmMem
 	BYTE ucBytes_Name = (BYTE)StrLength(pcClassName);
 	vstWindowConstraction->vbClassName = VMBlock(ucBytes_Name + 1); vstWindowConstraction->vbClassName[ucBytes_Name] = 0;
 	MemCopy(vstWindowConstraction->vbClassName, pcClassName, ucBytes_Name);
-
-	heRender = CreateEvent(nullptr, false, true, nullptr);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 VMEMORY __vectorcall RePag::DirectX::COGraphic::COFreiV(void)
 {
-	CloseHandle(heRender);
 	return ((COElement*)this)->COFreiV();
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,12 +57,13 @@ void __vectorcall RePag::DirectX::COGraphic::ExtendStyle(_In_ DWORD dwExtendStyl
 	if(vstWindowConstraction) vstWindowConstraction->dwExtendStyle = dwExtendStyleA | WS_EX_NOPARENTNOTIFY;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphic::CreateWindowGraphic(_In_ HWND hWndMain, _In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y)
+void __vectorcall RePag::DirectX::COGraphic::CreateWindowGraphic(_In_ COElement* pMainElementA, _In_ HWND hWndMain, _In_ long lHeightA, _In_ long lWidthA,
+																																 _In_ long lPos_x, _In_ long lPos_y)
 {
 	if(vstWindowConstraction){
 		while(FindWindowEx(hWndMain, nullptr, nullptr, vstWindowConstraction->asWindowName.c_Str())) vstWindowConstraction->asWindowName += "A";
 
-		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
+		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y; pMainElement = pMainElementA;
 
 		hWndElement = CreateWindowEx(vstWindowConstraction->dwExtendStyle, vstWindowConstraction->vbClassName, vstWindowConstraction->asWindowName.c_Str(),
 																 vstWindowConstraction->dwWindowStyle, ptPosition.x, ptPosition.y, lWidth, lHeight, hWndMain,

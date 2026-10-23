@@ -209,7 +209,7 @@ HRESULT __vectorcall RePag::DirectX::CreateDeviceIndependentResources(_Out_ STDe
   options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
 #endif
 
-  if(FAILED(hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory7), &options, (void**)&pstDeviceResources->ifd2d1Factory7))) goto Ende;
+  if(FAILED(hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, __uuidof(ID2D1Factory7), &options, (void**)&pstDeviceResources->ifd2d1Factory7))) goto Ende;
 
   if(FAILED(hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory7), reinterpret_cast<IUnknown**>(&pstDeviceResources->ifdwriteFactory7)))) goto Ende;
 

@@ -82,16 +82,16 @@ namespace RePag
 		{
 			COGraphicGroup* pGraphicGroup;
 			switch(uiMessage){
+				case WM_CREATE		: ((COGraphicGroup*)((LPCREATESTRUCT)lParam)->lpCreateParams)->WM_Create_Element(hWnd);
+														((COGraphicGroup*)((LPCREATESTRUCT)lParam)->lpCreateParams)->WM_Create();
 				case WM_SIZE			: pGraphicGroup = (COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 														if(pGraphicGroup) pGraphicGroup->WM_Size(lParam);
 														return NULL;
 				case WM_COMMAND		:	pGraphicGroup = (COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-														if(pGraphicGroup->pfnWM_Command){ pGraphicGroup->WM_Command_GrafikGruppe(uiMessage, wParam, lParam); return NULL; }
+														if(pGraphicGroup->pfnWM_Command){ pGraphicGroup->WM_Command_GraphicGroup(uiMessage, wParam, lParam); return NULL; }
 														else PostMessage(GetParent(hWnd), WM_COMMAND, wParam, lParam);
 														break;
-				case WM_NCDESTROY	:	pGraphicGroup = (COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-														if(pGraphicGroup->htEffect_Timer)	DeleteTimerQueueTimer(htqTimerQueue, pGraphicGroup->htEffect_Timer, INVALID_HANDLE_VALUE);
-														VMFreiV(pGraphicGroup);
+				case WM_NCDESTROY	:	VMFreiV((COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA));
 														return NULL;
 			}
 			return DefWindowProc(hWnd, uiMessage, wParam, lParam);
@@ -104,11 +104,89 @@ void __vectorcall RePag::DirectX::COGraphicGroup::COGraphicGroupV(_In_ const VME
 																																	_In_ STDeviceResources* pstDeviceResourcesA)
 {
 	COGraphicV(vmMemory, pcRePag_GraphicGroup, pcWindowName, uiDElementA, pstDeviceResourcesA);
+	crfBackground = D2D1::ColorF(RGB(90, 90, 90), 0.0f);
+	crfText = D2D1::ColorF(RGB(240, 240, 240), 1.0f);
+	pstDeviceResources->ifdwriteFactory7->CreateTextFormat(L"Arial", NULL, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+																												 13.0f, L"de-DE", &ifText);
 
 	pfnWM_Command = nullptr;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphicGroup::WM_Command_GrafikGruppe(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam)
+VMEMORY __vectorcall RePag::DirectX::COGraphicGroup::COFreiV(void)
+{
+	SafeRelease(&ifText); SafeRelease(&ifTextColor);
+	return ((COElement*)this)->COFreiV();
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::OnRender(void)
+{
+	ifD2D1Context6->BeginDraw();
+	ifD2D1Context6->Clear(crfBackground);
+	if(pfnOnRender) pfnOnRender(this);
+	ifD2D1Context6->EndDraw();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::OnPaint(void)
+{
+	ThreadSafe_Begin();
+	OnRender();
+	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
+	ThreadSafe_End();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::WM_Create(void)
+{
+	ifD2D1Context6->CreateSolidColorBrush(crfText, &ifTextColor);
+
+	if(crfBackground.a == 0.0f) crfBackground.a = 1.0f;
+
+	OnRender();
+	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::WM_Size(LPARAM lParam)
+{
+	ThreadSafe_Begin();
+	if(lHeight != HIWORD(lParam) || lWidth != LOWORD(lParam)){
+		lHeight = HIWORD(lParam); lWidth = LOWORD(lParam);
+		CreateWindowSizeDependentResources();
+		OnRender();
+		ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
+	}
+	ThreadSafe_End();
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::SetFont(STFont& stFont)
+{
+	ThreadSafe_Begin();
+	SafeRelease(&ifText);
+	pstDeviceResources->ifdwriteFactory7->CreateTextFormat(stFont.fontFamilyName, stFont.fontCollection, stFont.fontWeight, stFont.fontSytle,
+																												 stFont.fontStretch, stFont.fontSize, stFont.localeName, &ifText);
+	ThreadSafe_End();
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::SetTextColor(_In_ unsigned char ucRed, _In_ unsigned char ucGreen, _In_ unsigned char ucBlue, _In_ float fAlpha)
+{
+	ThreadSafe_Begin();
+	crfText = D2D1::ColorF(RGB(ucBlue, ucGreen, ucRed), fAlpha);
+	if(ifTextColor) ifTextColor->SetColor(crfText);
+	ThreadSafe_End();
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::SetTextColor(_In_ D2D1_COLOR_F& crfTextA)
+{
+	ThreadSafe_Begin();
+	crfText = crfTextA;
+	if(ifTextColor) ifTextColor->SetColor(crfText);
+	ThreadSafe_End();
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::DrawText(_In_z_ const wchar_t* wcInhalt, _In_ size_t szBytes_Text, _In_ const D2D1_RECT_F& rcfText)
+{
+	ifD2D1Context6->DrawText(wcInhalt, (UINT32)szBytes_Text, ifText, rcfText, ifTextColor);
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::WM_Command_GraphicGroup(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	STTHWM_CommandGG* stthWM_Command = (STTHWM_CommandGG*)VMBlock(sizeof(STTHWM_CommandGG));
 	stthWM_Command->hWndGG = hWndElement;	stthWM_Command->pGraphicGroup = this; stthWM_Command->uiMessage = uiMessage; stthWM_Command->wParam = wParam;	stthWM_Command->lParam = lParam;
@@ -119,20 +197,10 @@ void __vectorcall RePag::DirectX::COGraphicGroup::WM_Command_GrafikGruppe(_In_ u
 
 	if(stthWM_Command->hThread){ SetThreadPriority(stthWM_Command->hThread, THREAD_PRIORITY_NORMAL); ResumeThread(stthWM_Command->hThread); }
 }
+//-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::CreteWindowInGroup(COGraphic* pGrafik, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
-	pGrafik->CreateWindowGraphic(hWndElement, lHeightA, lWidthA, lPos_x, lPos_y);
-}
-//-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphicGroup::WM_Size(LPARAM lParam)
-{
-	ThreadSafe_Begin();
-	if(lHeight != HIWORD(lParam) || lWidth != LOWORD(lParam)){
-		lHeight = HIWORD(lParam); lWidth = LOWORD(lParam);
-
-		CreateWindowSizeDependentResources();
-	}
-	ThreadSafe_End();
+	pGrafik->CreateWindowGraphic(this, hWndElement, lHeightA, lWidthA, lPos_x, lPos_y);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::SetVisible(bool bVisible)

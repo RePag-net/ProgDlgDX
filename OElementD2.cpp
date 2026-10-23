@@ -32,8 +32,7 @@ void __vectorcall RePag::DirectX::COElement::COElementV(_In_ const VMEMORY vmMem
 	vmMemory = vmMemoryA;
 	pstDeviceResources = pstDeviceResourcesA;
 	hWndElement = nullptr;
-	htEffect_Timer = nullptr;
-	crfBackground = D2D1::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
+	crfBackground = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.0f);
 
 	stThread.ucFunction = stThread.dwActive = stThread.ucWait = 0; stThread.dwMain = stThread.dwActive = GetCurrentThreadId();
 	stThread.heElement[0] = CreateEvent(nullptr, false, true, nullptr); stThread.heElement[1] = CreateEvent(nullptr, false, false, nullptr);
@@ -56,7 +55,6 @@ VMEMORY __vectorcall RePag::DirectX::COElement::COFreiV(void)
 	SafeRelease(&ifDXGIBackBuffer);
 	SafeRelease(&ifDXGISwapChain4);
 	SafeRelease(&ifd2dBitmap1);
-	SafeRelease(&ifBackColor);
 
 	return vmMemory;
 }
@@ -120,8 +118,6 @@ void __vectorcall RePag::DirectX::COElement::WM_Create_Element(_In_ HWND hWnd)
 	rclDirty.top = 0; rclDirty.left = 0; rclDirty.right = rcClient.right; rclDirty.bottom = rcClient.bottom;
 	dxgiPresent.DirtyRectsCount = 1; dxgiPresent.pDirtyRects = &rclDirty;
 	dxgiPresent.pScrollOffset = nullptr; dxgiPresent.pScrollRect = nullptr;
-
-	ifD2D1Context6->CreateSolidColorBrush(crfBackground, &ifBackColor);	ifBackColor->SetColor(crfBackground);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 HWND __vectorcall RePag::DirectX::COElement::HWND_Element(void)
@@ -245,11 +241,10 @@ void __vectorcall RePag::DirectX::COElement::ChangeWindowPosition(_In_ long lPos
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ unsigned char ucRot, _In_ unsigned char ucGrun, _In_ unsigned char ucBlau, _In_ float fAlpha)
+void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ unsigned char ucRed, _In_ unsigned char ucGreen, _In_ unsigned char ucBlue, _In_ float fAlpha)
 {
 	ThreadSafe_Begin();
-	crfBackground =	D2D1::ColorF(RGB(ucBlau, ucGrun, ucRot), fAlpha);
-	if(ifBackColor) ifBackColor->SetColor(crfBackground);
+	crfBackground =	D2D1::ColorF(RGB(ucBlue, ucGreen, ucRed), fAlpha);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -257,7 +252,6 @@ void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ D2D1_COLOR_
 {
 	ThreadSafe_Begin();
 	crfBackground = crfBackgroundA;
-	if(ifBackColor) ifBackColor->SetColor(crfBackground);
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -265,14 +259,6 @@ void __vectorcall RePag::DirectX::COElement::GetBackgroundColor(_Out_ D2D1_COLOR
 {
 	ThreadSafe_Begin();
 	crfBackgroundA = crfBackground;
-	ThreadSafe_End();
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::Effect_Timer(_In_ bool bStart, _In_ unsigned long ulInterval_msek, _In_ void CALLBACK fnEffect_Timer(COElement*, bool bTimerOrWaitFired))
-{
-	ThreadSafe_Begin();
-	if(bStart && !htEffect_Timer) CreateTimerQueueTimer(&htEffect_Timer, htqTimerQueue, (WAITORTIMERCALLBACK)fnEffect_Timer, this, 0, ulInterval_msek, WT_EXECUTEINPERSISTENTTHREAD);
-	else if(!bStart && htEffect_Timer){ DeleteTimerQueueTimer(htqTimerQueue, htEffect_Timer, INVALID_HANDLE_VALUE); htEffect_Timer = nullptr; }
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------

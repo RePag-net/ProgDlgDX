@@ -31,6 +31,17 @@ namespace RePag
 {
 	namespace DirectX
 	{
+    //---------------------------------------------------------------------------------------------------------------------------------------
+    typedef struct STFont
+    {
+      const WCHAR* fontFamilyName;
+      IDWriteFontCollection* fontCollection;
+      DWRITE_FONT_WEIGHT fontWeight;
+      DWRITE_FONT_STYLE fontSytle;
+      DWRITE_FONT_STRETCH fontStretch;
+      float fontSize;
+      const WCHAR* localeName;
+    } STFont;
 		//---------------------------------------------------------------------------------------------------------------------------------------
 		class __declspec(dllexport) COGraphicGroup : public COGraphic
 		{
@@ -38,17 +49,30 @@ namespace RePag
       friend DWORD WINAPI thWM_Command_GraphicGroup(_In_ void* pvParam);
 
       private:
-      void __vectorcall WM_Size(LPARAM lParam);
-      void __vectorcall WM_Command_GrafikGruppe(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam);
+      IDWriteTextFormat* ifText;
+      D2D1_COLOR_F crfText;
+      ID2D1SolidColorBrush* ifTextColor;
+      void __vectorcall OnRender(void);
+      void __vectorcall OnPaint(void);
+      void __vectorcall WM_Create(void);
+      void __vectorcall WM_Size(_In_ LPARAM lParam);
+      void __vectorcall WM_Command_GraphicGroup(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
       protected:
 
       public:
       void __vectorcall COGraphicGroupV(_In_ const VMEMORY vmMemory, _In_ const char* pcWindowName, _In_ unsigned int uiDElementA,
                                         _In_ STDeviceResources* pstDeviceResourcesA);
+      VMEMORY __vectorcall COFreiV(void);
       void __vectorcall CreteWindowInGroup(_In_ COGraphic* pGraphic, _In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y);
       void(__vectorcall* pfnWM_Command)(_In_ HWND, _In_ unsigned int, _In_ WPARAM, _In_ LPARAM);
+      void(__vectorcall* pfnOnRender)(_In_ COGraphicGroup* pSwitchGroup);
+      void __vectorcall SetFont(_In_ STFont& stFont);
+      void __vectorcall SetTextColor(_In_ unsigned char ucRed, _In_ unsigned char ucGreen, _In_ unsigned char ucBlue, _In_ float fAlpha);
+      void __vectorcall SetTextColor(_In_ D2D1_COLOR_F& crfTextA);
+      void __vectorcall DrawText(_In_z_ const wchar_t* wcInhalt, _In_ size_t szBytes_Text, _In_ const D2D1_RECT_F& rcfText);
       void __vectorcall SetVisible(_In_ bool bVisible);
+
     };
 		//---------------------------------------------------------------------------------------------------------------------------------------
 		__declspec(dllexport) COGraphicGroup* __vectorcall COGraphicGroupV(_In_ const char* pcWindowName, _In_ unsigned int uiIDElement, _In_ STDeviceResources* pstDeviceResourcesA);
