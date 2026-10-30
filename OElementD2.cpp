@@ -255,11 +255,12 @@ void __vectorcall RePag::DirectX::COElement::SetBackgroundColor(_In_ D2D1_COLOR_
 	ThreadSafe_End();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COElement::GetBackgroundColor(_Out_ D2D1_COLOR_F& crfBackgroundA)
+D2D1_COLOR_F& __vectorcall RePag::DirectX::COElement::GetBackgroundColor(_Out_ D2D1_COLOR_F& crfBackgroundA)
 {
 	ThreadSafe_Begin();
 	crfBackgroundA = crfBackground;
 	ThreadSafe_End();
+	return crfBackgroundA;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 inline void __vectorcall RePag::DirectX::COElement::ThreadSafe_Begin(void)

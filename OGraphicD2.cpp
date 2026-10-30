@@ -26,6 +26,8 @@ SOFTWARE.
 ******************************************************************************/
 #include "HProgDlgDX.h"
 #include "OGraphicD2.h"
+#include "OGraphicGroupD2.h"
+#include "ODialogD2.h"
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphic::COGraphicV(_In_ const VMEMORY vmMemory, _In_ const char* pcClassName, _In_ const char* pcWindowName,
 																										_In_ unsigned int uiElementA,	_In_ STDeviceResources* pstDeviceResourcesA)
@@ -40,6 +42,7 @@ void __vectorcall RePag::DirectX::COGraphic::COGraphicV(_In_ const VMEMORY vmMem
 	BYTE ucBytes_Name = (BYTE)StrLength(pcClassName);
 	vstWindowConstraction->vbClassName = VMBlock(ucBytes_Name + 1); vstWindowConstraction->vbClassName[ucBytes_Name] = 0;
 	MemCopy(vstWindowConstraction->vbClassName, pcClassName, ucBytes_Name);
+	bGraphicGroup = false;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 VMEMORY __vectorcall RePag::DirectX::COGraphic::COFreiV(void)
@@ -57,13 +60,13 @@ void __vectorcall RePag::DirectX::COGraphic::ExtendStyle(_In_ DWORD dwExtendStyl
 	if(vstWindowConstraction) vstWindowConstraction->dwExtendStyle = dwExtendStyleA | WS_EX_NOPARENTNOTIFY;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphic::CreateWindowGraphic(_In_ COElement* pMainElementA, _In_ HWND hWndMain, _In_ long lHeightA, _In_ long lWidthA,
+void __vectorcall RePag::DirectX::COGraphic::CreateWindowGraphic(_In_ HWND hWndMain, _In_ long lHeightA, _In_ long lWidthA,
 																																 _In_ long lPos_x, _In_ long lPos_y)
 {
 	if(vstWindowConstraction){
 		while(FindWindowEx(hWndMain, nullptr, nullptr, vstWindowConstraction->asWindowName.c_Str())) vstWindowConstraction->asWindowName += "A";
 
-		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y; pMainElement = pMainElementA;
+		lHeight = lHeightA; lWidth = lWidthA; ptPosition.x = lPos_x; ptPosition.y = lPos_y;
 
 		hWndElement = CreateWindowEx(vstWindowConstraction->dwExtendStyle, vstWindowConstraction->vbClassName, vstWindowConstraction->asWindowName.c_Str(),
 																 vstWindowConstraction->dwWindowStyle, ptPosition.x, ptPosition.y, lWidth, lHeight, hWndMain,
@@ -73,6 +76,7 @@ void __vectorcall RePag::DirectX::COGraphic::CreateWindowGraphic(_In_ COElement*
 			SetWindowLongPtr(hWndElement, GWLP_USERDATA, (LONG_PTR)this);
 			RECT rcClient; GetClientRect(hWndElement, &rcClient);	lWidth = rcClient.right; lHeight = rcClient.bottom;
 			VMFrei(vstWindowConstraction->vbClassName); vstWindowConstraction->asWindowName.~COStringA(); VMFrei(vstWindowConstraction); vstWindowConstraction = nullptr;
+			PostMessage(hWndElement, WM_INITPAINT, NULL, NULL);
 		}
 	}
 }
@@ -93,3 +97,53 @@ bool __vectorcall RePag::DirectX::COGraphic::Visible(void)
 	return IsWindowVisible(hWndElement);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphic::Background(void)
+{
+	ID2D1GradientStopCollection* ifGradientStops = nullptr;
+	D2D1_POINT_2F ptfStartPoint = D2D1::Point2F(0.0f, 0.0f); D2D1_POINT_2F ptfEndPoint = D2D1::Point2F(0.0f, 0.0f);
+	if(bGraphicGroup){
+		COGraphicGroup* pGraphicGroup = (COGraphicGroup*)GetWindowLongPtr(GetParent(hWndElement), GWLP_USERDATA);
+		if(!pGraphicGroup->GetLinearGradient()) ifD2D1Context6->Clear(pGraphicGroup->GetBackgroundColor(crfBackground));
+		else{
+			D2D1_GRADIENT_STOP gs2GradientStops[2];
+			pGraphicGroup->GradientStops(gs2GradientStops);
+			if(FAILED(ifD2D1Context6->CreateGradientStopCollection(gs2GradientStops, 2, D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &ifGradientStops))) goto Error;
+			pGraphicGroup->LinearGradientStartPoint(ptfStartPoint);
+			ptfStartPoint.x -= (float)ptPosition.x; ptfStartPoint.y -= (float)ptPosition.y;
+			pGraphicGroup->LinearGradientEndPoint(ptfEndPoint);
+			ptfEndPoint.x -= (float)ptPosition.x; ptfEndPoint.y -= (float)ptPosition.y;
+		}
+	}
+	else if(!Background_Dialog(ifGradientStops, ptfStartPoint, ptfEndPoint)) goto Error;
+	Background_Rectangle(ifGradientStops, ptfStartPoint, ptfEndPoint);
+Error:
+	SafeRelease(&ifGradientStops);
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+bool __vectorcall RePag::DirectX::COGraphic::Background_Dialog(ID2D1GradientStopCollection*& ifGradientStops,
+																															 D2D1_POINT_2F& ptfStartPoint, D2D1_POINT_2F& ptfEndPoint)
+{
+	CODialog* pDialog = (CODialog*)GetWindowLongPtr(GetParent(hWndElement), GWLP_USERDATA);
+	if(!pDialog->GetLinearGradient()) ifD2D1Context6->Clear(pDialog->GetBackgroundColor(crfBackground));
+	else{
+		D2D1_GRADIENT_STOP gs2GradientStops[2];
+		pDialog->GradientStops(gs2GradientStops);
+		if(FAILED(ifD2D1Context6->CreateGradientStopCollection(gs2GradientStops, 2, D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &ifGradientStops))) return false;
+		pDialog->LinearGradientStartPoint(ptfStartPoint);
+		ptfStartPoint.x -= (float)ptPosition.x; ptfStartPoint.y -= (float)ptPosition.y;
+		pDialog->LinearGradientEndPoint(ptfEndPoint);
+		ptfEndPoint.x -= (float)ptPosition.x; ptfEndPoint.y -= (float)ptPosition.y;
+	}
+	return true;
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphic::Background_Rectangle(ID2D1GradientStopCollection*& ifGradientStops,
+																																	D2D1_POINT_2F& ptfStartPoint, D2D1_POINT_2F& ptfEndPoint)
+{
+	ID2D1LinearGradientBrush* ifMainGradientBrush = nullptr;
+	if(SUCCEEDED(ifD2D1Context6->CreateLinearGradientBrush(
+		D2D1::LinearGradientBrushProperties(ptfStartPoint, ptfEndPoint),
+		D2D1::BrushProperties(1.0f, D2D1::IdentityMatrix()), ifGradientStops, &ifMainGradientBrush)))
+		ifD2D1Context6->FillRectangle(&D2D1::RectF(0.0f, 0.0f, (float)lWidth, (float)lHeight), ifMainGradientBrush);
+	SafeRelease(&ifMainGradientBrush);
+}

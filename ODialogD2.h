@@ -47,17 +47,31 @@ namespace RePag
           WNDCLASSEX wndClass;
         };
         STWindowConstraction* vstWindowConstraction;
-        long lReturn;
         bool bModal;
+        bool bLinearGradient;
+        long lReturn;
         DWORD dwThreadID;
+        IDWriteTextFormat* ifText;
+        D2D1_COLOR_F crfText;
+        ID2D1SolidColorBrush* ifTextColor;
+        D2D1_COLOR_F crfGradient_1_0;
+        D2D1_COLOR_F crfGradient_2_1;
+        ID2D1SolidColorBrush* ifBackground;
+        ID2D1LinearGradientBrush* ifLinearGradientBrush;
+        D2D1_POINT_2F ptfStartPoint;
+        D2D1_POINT_2F ptfEndPoint;
+        D2D1_GRADIENT_STOP gs2GradientStops[2];
+        float fEdgeRadius_X;
+        float fEdgeRadius_Y;
+        void __vectorcall OnRender(void);
+        void __vectorcall InitPaint(void);
+        void __vectorcall OnPaint(void);
         void __vectorcall WM_Size(LPARAM lParam);
         void __vectorcall WM_Move_Dialog(void);
-        void __vectorcall WM_Paint_Dialog(void);
         void __vectorcall WM_Command_Dialog(_In_ unsigned int uiMessage, _In_ WPARAM wParam, _In_ LPARAM lParam);
         LRESULT(CALLBACK* pfnWndProc_DLGDialog)(_In_ HWND, _In_ unsigned int, _In_ WPARAM, _In_ LPARAM);
 
       protected:
-        void __vectorcall WM_Create(void);
         void __vectorcall WindowStyle(_In_ DWORD dwFensterStilA);
         void __vectorcall ExtendStyle(_In_ DWORD dwErweitertStilA);
         void __vectorcall WindowTitel(_In_ const char* pcFensterTitel);
@@ -71,12 +85,22 @@ namespace RePag
         void __vectorcall CODialogV(_In_ const VMEMORY vmMemory, _In_z_ const char* pcWindowName, _In_ bool bModalA,
                                     _In_ LRESULT CALLBACK WndProc_DLG(HWND, unsigned int, WPARAM, LPARAM), _In_ STDeviceResources* pstDeviceResourcesA);
         VMEMORY __vectorcall COFreiV(void);
+        void(__vectorcall* pfnOnRender)(_In_ CODialog* pDialog);
         LRESULT(CALLBACK* pfnWndProc_Dialog)(_In_ HWND, _In_ unsigned int, _In_ WPARAM, _In_ LPARAM);
         void(__vectorcall* pfnWM_Move)(_In_ CODialog*, LPARAM);
         void(__vectorcall* pfnWM_Command)(_In_ HWND, _In_ unsigned int, _In_ WPARAM, _In_ LPARAM);
         void __vectorcall CreateWindowDialog(_In_ HWND hWndMain, _In_ long lHeightA, _In_ long lWidthA, _In_ long lPos_x, _In_ long lPos_y);
         long __vectorcall SetVisible(_In_ bool bSichtbar, _In_ unsigned char ucAusrichtung, _In_ long lRuckgabeA);
         void __vectorcall Close(void);
+        void __vectorcall SetFont(_In_ STFont& stFont);
+        void __vectorcall SetTextColor(_In_ unsigned char ucRed, _In_ unsigned char ucGreen, _In_ unsigned char ucBlue, _In_ float fAlpha);
+        void __vectorcall SetTextColor(_In_ D2D1_COLOR_F& crfTextA);
+        void __vectorcall DrawText(_In_z_ const wchar_t* wcInhalt, _In_ size_t szBytes_Text, _In_ const D2D1_RECT_F& rcfText);
+        void __vectorcall SetLinearGradient(_In_ bool bLinearGradientA);
+        bool __vectorcall GetLinearGradient(void);
+        void __vectorcall LinearGradientStartPoint(_Out_ D2D1_POINT_2F& ptfStartPointA);
+        void __vectorcall LinearGradientEndPoint(_Out_ D2D1_POINT_2F& ptfEndPointA);
+        void __vectorcall GradientStops(_Out_ D2D1_GRADIENT_STOP GradientStopsA[2]);
 
 		};
 		//---------------------------------------------------------------------------------------------------------------------------------------

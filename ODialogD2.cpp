@@ -79,36 +79,34 @@ namespace RePag
 		{
 			CODialog* pDialog;
 			switch(uiMessage){
-				case WM_CREATE	:	_Dialog->ptPosition.x = ((LPCREATESTRUCT)lParam)->x; _Dialog->ptPosition.y = ((LPCREATESTRUCT)lParam)->y;
-													_Dialog->pfnWndProc_Dialog = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)_Dialog->pfnWndProc_DLGDialog);
-													_Dialog->WM_Create_Element(hWnd);
-													_Dialog->WM_Create();
-													SendMessage(hWnd, WM_CREATE, wParam, lParam);
-													return NULL;
-				case WM_SIZE		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-													if(pDialog){
-														pDialog->ThreadSafe_Begin();
-														pDialog->WM_Size(lParam);
-														if(pDialog->pfnWM_Size) pDialog->pfnWM_Size(pDialog, wParam, lParam);
-														pDialog->ThreadSafe_End();
-													}
-													else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
-													return NULL;
-				case WM_MOVE		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-													if(pDialog){
-														pDialog->ThreadSafe_Begin();
-														pDialog->WM_Move_Dialog();
-														if(pDialog->pfnWM_Move) pDialog->pfnWM_Move(pDialog, lParam);
-														pDialog->ThreadSafe_End();
-													}
-													else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
-													return NULL;
-				case WM_COMMAND:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-													if(pDialog->pfnWM_Command){ pDialog->WM_Command_Dialog(uiMessage, wParam, lParam); return NULL; }
-													else break;
-				case WM_CLOSE		:	DestroyWindow(hWnd);
-													return NULL;
-				case WM_DESTROY: if(hWnd == hWndErstes) PostQuitMessage(0);
+				case WM_CREATE		:	_Dialog->ptPosition.x = ((LPCREATESTRUCT)lParam)->x; _Dialog->ptPosition.y = ((LPCREATESTRUCT)lParam)->y;
+														_Dialog->pfnWndProc_Dialog = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)_Dialog->pfnWndProc_DLGDialog);
+														_Dialog->WM_Create_Element(hWnd);
+														return NULL;
+				case WM_SIZE			:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+														if(pDialog){
+															pDialog->ThreadSafe_Begin();
+															pDialog->WM_Size(lParam);
+															if(pDialog->pfnWM_Size) pDialog->pfnWM_Size(pDialog, wParam, lParam);
+															pDialog->ThreadSafe_End();
+														}
+														else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
+													  return NULL;
+				case WM_MOVE			:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+														if(pDialog){
+															pDialog->ThreadSafe_Begin();
+															pDialog->WM_Move_Dialog();
+															if(pDialog->pfnWM_Move) pDialog->pfnWM_Move(pDialog, lParam);
+															pDialog->ThreadSafe_End();
+														}
+														else return DefWindowProc(hWnd, uiMessage, wParam, lParam);
+														return NULL;
+				case WM_COMMAND		:	pDialog = (CODialog*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+														if(pDialog->pfnWM_Command){ pDialog->WM_Command_Dialog(uiMessage, wParam, lParam); return NULL; }
+														else break;
+				case WM_CLOSE			:	DestroyWindow(hWnd);
+														return NULL;
+				case WM_DESTROY		: if(hWnd == hWndErstes) PostQuitMessage(0);
 			}
 			return DefWindowProc(hWnd, uiMessage, wParam, lParam);
 		}
@@ -143,7 +141,21 @@ void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_ const VMEMORY vmMemor
 	pfnWndProc_DLGDialog = WndProc_DLG;
 	bModal = bModalA;
 
+	pfnOnRender = nullptr;
 	pfnWM_Move = nullptr;
+
+	pstDeviceResources->ifdwriteFactory7->CreateTextFormat(L"Arial", NULL, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+																												13.0f, L"de-DE", &ifText);
+	crfBackground = D2D1::ColorF{RGB(80, 80, 80), 0.0f};
+	crfText = D2D1::ColorF(RGB(240, 240, 240), 1.0f);
+
+	crfGradient_1_0 = D2D1::ColorF(RGB(35, 35, 35), 1.0f);
+	crfGradient_2_1 = D2D1::ColorF(RGB(110, 110, 110), 1.0f);
+	ifBackground = nullptr;
+
+	ifLinearGradientBrush = nullptr;
+	ptfStartPoint = D2D1::Point2F(0.0f, 0.0f);
+	ptfEndPoint = D2D1::Point2F(0.0f, 0.0f);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::CODialog::CODialogV(_In_z_ const char* pcWindowName, _In_ bool bModalA,
@@ -164,18 +176,56 @@ VMEMORY __vectorcall RePag::DirectX::CODialog::COFreiV(void)
 	}
 	vthlDialoge->ThIteratorEnd();
 
+	SafeRelease(&ifText); SafeRelease(&ifTextColor); SafeRelease(&ifBackground);
+
  return ((COElement*)this)->COFreiV();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::CODialog::WM_Create(void)
+void __vectorcall RePag::DirectX::CODialog::OnRender(void)
 {
 	ifD2D1Context6->BeginDraw();
-	if(crfBackground.a == 0.0f) crfBackground.a = 1.0f;
-	ifD2D1Context6->Clear(crfBackground);
+	D2D1_RECT_F rcfButton = {0.0f, 0.0f, (float)lWidth, (float)lHeight};
+	D2D1_ROUNDED_RECT rrcfButton = {rcfButton, fEdgeRadius_X, fEdgeRadius_Y};
+	if(!bLinearGradient) ifD2D1Context6->FillRectangle(rcfButton, ifBackground);
+	else{
+		gs2GradientStops[0].color = crfGradient_1_0; gs2GradientStops[0].position = 0.0f;
+		gs2GradientStops[1].color = crfGradient_2_1; gs2GradientStops[1].position = 1.0f;
+		ID2D1GradientStopCollection* ifGradientStops = nullptr;
+		ifD2D1Context6->CreateGradientStopCollection(gs2GradientStops, 2, D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &ifGradientStops);
+
+		ifD2D1Context6->CreateLinearGradientBrush(D2D1::LinearGradientBrushProperties(ptfStartPoint, ptfEndPoint),
+			D2D1::BrushProperties(1.0f, D2D1::IdentityMatrix()), ifGradientStops, &ifLinearGradientBrush);
+
+		ifD2D1Context6->FillRoundedRectangle(rrcfButton, ifLinearGradientBrush);
+		SafeRelease(&ifGradientStops); SafeRelease(&ifLinearGradientBrush);
+	}
+	if(pfnOnRender) pfnOnRender(this);
 	ifD2D1Context6->EndDraw();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::OnPaint(void)
+{
+	ThreadSafe_Begin();
+	OnRender();
+	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
+	ThreadSafe_End();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::InitPaint(void)
+{
+	if(crfBackground.a == 0.0f) crfBackground.a = 1.0f;
+	
+	ifD2D1Context6->CreateSolidColorBrush(crfText, &ifTextColor);
+	ifD2D1Context6->CreateSolidColorBrush(crfBackground, &ifBackground);
+
+	if(ptfStartPoint.x == 0.0f && ptfStartPoint.y == 0.0f && ptfEndPoint.x == 0.0f && ptfEndPoint.y == 0.0f){
+		ptfStartPoint = {(float)lWidth / 2.0f, 0.0f}; ptfEndPoint = {(float)lWidth / 2.0f, (float)lHeight};
+	};
+
+	OnRender();
 	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
 }
-//-------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::CODialog::WM_Size(LPARAM lParam)
 {
 	ThreadSafe_Begin();
@@ -202,6 +252,36 @@ void __vectorcall RePag::DirectX::CODialog::WM_Command_Dialog(_In_ unsigned int 
 	stThreadId->pElement = this; stThreadId->dwThreadId = stthWM_Command->dwThreadId; vthlThreadId->ThToEnd(stThreadId);
 
 	if(stthWM_Command->hThread){ SetThreadPriority(stthWM_Command->hThread, THREAD_PRIORITY_NORMAL); ResumeThread(stthWM_Command->hThread); }
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::SetFont(STFont& stFont)
+{
+	ThreadSafe_Begin();
+	SafeRelease(&ifText);
+	pstDeviceResources->ifdwriteFactory7->CreateTextFormat(stFont.fontFamilyName, stFont.fontCollection, stFont.fontWeight, stFont.fontSytle,
+																												 stFont.fontStretch, stFont.fontSize, stFont.localeName, &ifText);
+	ThreadSafe_End();
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::SetTextColor(_In_ unsigned char ucRed, _In_ unsigned char ucGreen, _In_ unsigned char ucBlue, _In_ float fAlpha)
+{
+	ThreadSafe_Begin();
+	crfText = D2D1::ColorF(RGB(ucBlue, ucGreen, ucRed), fAlpha);
+	if(ifTextColor) ifTextColor->SetColor(crfText);
+	ThreadSafe_End();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::SetTextColor(_In_ D2D1_COLOR_F& crfTextA)
+{
+	ThreadSafe_Begin();
+	crfText = crfTextA;
+	if(ifTextColor) ifTextColor->SetColor(crfText);
+	ThreadSafe_End();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::DrawText(_In_z_ const wchar_t* wcInhalt, _In_ size_t szBytes_Text, _In_ const D2D1_RECT_F& rcfText)
+{
+	ifD2D1Context6->DrawText(wcInhalt, (UINT32)szBytes_Text, ifText, rcfText, ifTextColor);
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::CODialog::WindowStyle(_In_ DWORD dwWindowStyleA)
@@ -243,6 +323,8 @@ void __vectorcall RePag::DirectX::CODialog::CreateWindowDialog(_In_ HWND hWndMai
 			SetWindowText(hWndElement, vstWindowConstraction->vbTitel); SetWindowLongPtr(hWndElement, GWLP_USERDATA, (LONG_PTR)this);
 			RECT rcClient; GetClientRect(hWndElement, &rcClient); lWidth = rcClient.right; lHeight = rcClient.bottom;
 			VMFrei(vstWindowConstraction->vbTitel); vstWindowConstraction->asName.~COStringA(); VMFrei(vstWindowConstraction); vstWindowConstraction = nullptr;
+			InitPaint();
+			PostMessage(hWndElement, WM_INITPAINT, NULL, NULL);
 		}
 	}
 }
@@ -332,3 +414,41 @@ void __vectorcall RePag::DirectX::CODialog::Menu(_In_ long lMenu)
 	else vstWindowConstraction->wndClass.lpszMenuName = MAKEINTRESOURCE(lMenu);
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::SetLinearGradient(_In_ bool bLinearGradientA)
+{
+	ThreadSafe_Begin();
+	bLinearGradient = bLinearGradientA;
+	ThreadSafe_End();
+	if(hWndElement) OnPaint();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+bool __vectorcall RePag::DirectX::CODialog::GetLinearGradient(void)
+{
+	bool bLinearGradientA;
+	ThreadSafe_Begin();
+	bLinearGradientA = bLinearGradient;
+	ThreadSafe_End();
+	return bLinearGradientA;
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::LinearGradientStartPoint(_Out_ D2D1_POINT_2F& ptfStartPointA)
+{
+	ThreadSafe_Begin();
+	ptfStartPointA = ptfStartPoint;
+	ThreadSafe_End();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::LinearGradientEndPoint(_Out_ D2D1_POINT_2F& ptfEndPointA)
+{
+	ThreadSafe_Begin();
+	ptfEndPointA = ptfEndPoint;
+	ThreadSafe_End();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::CODialog::GradientStops(_Out_ D2D1_GRADIENT_STOP gs2GradientStopsA[2])
+{
+	ThreadSafe_Begin();
+	gs2GradientStopsA[0] = gs2GradientStops[0];
+	gs2GradientStopsA[1] = gs2GradientStops[1];
+	ThreadSafe_End();
+}

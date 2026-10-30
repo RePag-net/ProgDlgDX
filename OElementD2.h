@@ -42,6 +42,17 @@ namespace RePag
 			FLOAT dpiY;
 		} STDeviceResources;
 		//---------------------------------------------------------------------------------------------------------------------------------------
+		typedef struct STFont
+		{
+			const WCHAR* fontFamilyName;
+			IDWriteFontCollection* fontCollection;
+			DWRITE_FONT_WEIGHT fontWeight;
+			DWRITE_FONT_STYLE fontSytle;
+			DWRITE_FONT_STRETCH fontStretch;
+			float fontSize;
+			const WCHAR* localeName;
+		} STFont;
+		//---------------------------------------------------------------------------------------------------------------------------------------
 		class __declspec(dllexport) COElement
 		{
 		private:
@@ -64,17 +75,16 @@ namespace RePag
 			D2D1_COLOR_F crfBackground;
 			RECT rclDirty;
 			DXGI_PRESENT_PARAMETERS dxgiPresent;
-			void __vectorcall WM_Create_Element(_In_ HWND hWnd);
-			inline void __vectorcall ThreadSafe_Begin(void);
-			inline void __vectorcall ThreadSafe_End(void);
-			void __vectorcall COElementV(_In_ const VMEMORY vmMemoryA, _In_ STDeviceResources* pstDeviceResourcesA);
-
 			STDeviceResources* pstDeviceResources;
 			ID2D1DeviceContext6* ifD2D1Context6;
 			IDXGISwapChain4* ifDXGISwapChain4;
 			ID2D1Bitmap1* ifd2dBitmap1;
 			IDXGISurface2* ifDXGIBackBuffer;
+			void __vectorcall WM_Create_Element(_In_ HWND hWnd);
+			inline void __vectorcall ThreadSafe_Begin(void);
+			inline void __vectorcall ThreadSafe_End(void);
 			void __vectorcall CreateWindowSizeDependentResources(void);
+			void __vectorcall COElementV(_In_ const VMEMORY vmMemoryA, _In_ STDeviceResources* pstDeviceResourcesA);
 
 		public:
 			VMEMORY __vectorcall COFreiV(void);
@@ -97,7 +107,7 @@ namespace RePag
 			void __vectorcall ChangeWindowPosition(_In_ long lPos_x, _In_ long lPos_y);
 			void __vectorcall SetBackgroundColor(_In_ unsigned char ucRed, _In_ unsigned char ucGreen, _In_ unsigned char ucBlue, _In_ float fAlpha);
 			void __vectorcall SetBackgroundColor(_In_ D2D1_COLOR_F& crfBackgroundA);
-			void __vectorcall GetBackgroundColor(_Out_ D2D1_COLOR_F& crfBackgroundA);
+			D2D1_COLOR_F& __vectorcall GetBackgroundColor(_Out_ D2D1_COLOR_F& crfBackgroundA);
 
 		};
 		//---------------------------------------------------------------------------------------------------------------------------------------

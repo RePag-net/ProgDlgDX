@@ -83,9 +83,11 @@ namespace RePag
 			COGraphicGroup* pGraphicGroup;
 			switch(uiMessage){
 				case WM_CREATE		: ((COGraphicGroup*)((LPCREATESTRUCT)lParam)->lpCreateParams)->WM_Create_Element(hWnd);
-														((COGraphicGroup*)((LPCREATESTRUCT)lParam)->lpCreateParams)->WM_Create();
+														return NULL;
 				case WM_SIZE			: pGraphicGroup = (COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 														if(pGraphicGroup) pGraphicGroup->WM_Size(lParam);
+														return NULL;
+				case WM_USER			: ((COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA))->InitPaint();
 														return NULL;
 				case WM_COMMAND		:	pGraphicGroup = (COGraphicGroup*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 														if(pGraphicGroup->pfnWM_Command){ pGraphicGroup->WM_Command_GraphicGroup(uiMessage, wParam, lParam); return NULL; }
@@ -104,24 +106,51 @@ void __vectorcall RePag::DirectX::COGraphicGroup::COGraphicGroupV(_In_ const VME
 																																	_In_ STDeviceResources* pstDeviceResourcesA)
 {
 	COGraphicV(vmMemory, pcRePag_GraphicGroup, pcWindowName, uiDElementA, pstDeviceResourcesA);
+	pstDeviceResources->ifdwriteFactory7->CreateTextFormat(L"Arial", NULL, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+																							
+																												 13.0f, L"de-DE", &ifText);
 	crfBackground = D2D1::ColorF(RGB(90, 90, 90), 0.0f);
 	crfText = D2D1::ColorF(RGB(240, 240, 240), 1.0f);
-	pstDeviceResources->ifdwriteFactory7->CreateTextFormat(L"Arial", NULL, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
-																												 13.0f, L"de-DE", &ifText);
+  crfGradient_1_0 = D2D1::ColorF(RGB(35, 35, 35), 1.0f);
+	crfGradient_2_1 = D2D1::ColorF(RGB(110, 110, 110), 1.0f);
+	ifBackground = nullptr;
+
+	ifLinearGradientBrush = nullptr;
+	ptfStartPoint = D2D1::Point2F(0.0f, 0.0f);
+	ptfEndPoint = D2D1::Point2F(0.0f, 0.0f);
+
+	fEdgeRadius_X = 15.0f;
+	fEdgeRadius_Y = 15.0f;
 
 	pfnWM_Command = nullptr;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 VMEMORY __vectorcall RePag::DirectX::COGraphicGroup::COFreiV(void)
 {
-	SafeRelease(&ifText); SafeRelease(&ifTextColor);
+	SafeRelease(&ifText); SafeRelease(&ifTextColor); SafeRelease(&ifBackground);
 	return ((COElement*)this)->COFreiV();
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::OnRender(void)
 {
 	ifD2D1Context6->BeginDraw();
-	ifD2D1Context6->Clear(crfBackground);
+	Background();
+
+	D2D1_RECT_F rcfButton = {0.0f, 0.0f, (float)lWidth, (float)lHeight};
+	D2D1_ROUNDED_RECT rrcfButton = {rcfButton, fEdgeRadius_X, fEdgeRadius_Y};
+	if(!bLinearGradient) ifD2D1Context6->FillRoundedRectangle(rrcfButton, ifBackground);
+	else{
+		gs2GradientStops[0].color = crfGradient_1_0; gs2GradientStops[0].position = 0.0f;
+		gs2GradientStops[1].color = crfGradient_2_1; gs2GradientStops[1].position = 1.0f;
+		ID2D1GradientStopCollection* ifGradientStops = nullptr;
+		ifD2D1Context6->CreateGradientStopCollection(gs2GradientStops, 2, D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &ifGradientStops);
+
+		ifD2D1Context6->CreateLinearGradientBrush(D2D1::LinearGradientBrushProperties(ptfStartPoint, ptfEndPoint),
+			D2D1::BrushProperties(1.0f, D2D1::IdentityMatrix()), ifGradientStops, &ifLinearGradientBrush);
+
+		ifD2D1Context6->FillRoundedRectangle(rrcfButton, ifLinearGradientBrush);
+		SafeRelease(&ifGradientStops); SafeRelease(&ifLinearGradientBrush);
+	}
 	if(pfnOnRender) pfnOnRender(this);
 	ifD2D1Context6->EndDraw();
 }
@@ -134,11 +163,16 @@ void __vectorcall RePag::DirectX::COGraphicGroup::OnPaint(void)
 	ThreadSafe_End();
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphicGroup::WM_Create(void)
+void __vectorcall RePag::DirectX::COGraphicGroup::InitPaint(void)
 {
-	ifD2D1Context6->CreateSolidColorBrush(crfText, &ifTextColor);
-
 	if(crfBackground.a == 0.0f) crfBackground.a = 1.0f;
+
+	ifD2D1Context6->CreateSolidColorBrush(crfText, &ifTextColor);
+	ifD2D1Context6->CreateSolidColorBrush(crfBackground, &ifBackground);
+
+	if(ptfStartPoint.x == 0.0f && ptfStartPoint.y == 0.0f && ptfEndPoint.x == 0.0f && ptfEndPoint.y == 0.0f){
+		ptfStartPoint = {(float)lWidth / 2.0f, 0.0f}; ptfEndPoint = {(float)lWidth / 2.0f, (float)lHeight};
+	};
 
 	OnRender();
 	ifDXGISwapChain4->Present1(0, NULL, &dxgiPresent);
@@ -198,13 +232,53 @@ void __vectorcall RePag::DirectX::COGraphicGroup::WM_Command_GraphicGroup(_In_ u
 	if(stthWM_Command->hThread){ SetThreadPriority(stthWM_Command->hThread, THREAD_PRIORITY_NORMAL); ResumeThread(stthWM_Command->hThread); }
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-void __vectorcall RePag::DirectX::COGraphicGroup::CreteWindowInGroup(COGraphic* pGrafik, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
+void __vectorcall RePag::DirectX::COGraphicGroup::CreteWindowInGroup(COGraphic* pGraphic, long lHeightA, long lWidthA, long lPos_x, long lPos_y)
 {
-	pGrafik->CreateWindowGraphic(this, hWndElement, lHeightA, lWidthA, lPos_x, lPos_y);
+	pGraphic->bGraphicGroup = true;
+	pGraphic->CreateWindowGraphic(hWndElement, lHeightA, lWidthA, lPos_x, lPos_y);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 void __vectorcall RePag::DirectX::COGraphicGroup::SetVisible(bool bVisible)
 {
 	if(bVisible) ShowWindow(hWndElement, SW_SHOW);
 	else ShowWindow(hWndElement, SW_HIDE);
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::SetLinearGradient(_In_ bool bLinearGradientA)
+{
+	ThreadSafe_Begin();
+	bLinearGradient = bLinearGradientA;
+	ThreadSafe_End();
+	if(hWndElement) OnPaint();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+bool __vectorcall RePag::DirectX::COGraphicGroup::GetLinearGradient(void)
+{
+	bool bLinearGradientA;
+	ThreadSafe_Begin();
+	bLinearGradientA = bLinearGradient;
+	ThreadSafe_End();
+	return bLinearGradientA;
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::LinearGradientStartPoint(_Out_ D2D1_POINT_2F& ptfStartPointA)
+{
+	ThreadSafe_Begin();
+	ptfStartPointA = ptfStartPoint;
+	ThreadSafe_End();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::LinearGradientEndPoint(_Out_ D2D1_POINT_2F& ptfEndPointA)
+{
+	ThreadSafe_Begin();
+	ptfEndPointA = ptfEndPoint;
+	ThreadSafe_End();
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+void __vectorcall RePag::DirectX::COGraphicGroup::GradientStops(_Out_ D2D1_GRADIENT_STOP gs2GradientStopsA[2])
+{
+	ThreadSafe_Begin();
+	gs2GradientStopsA[0] = gs2GradientStops[0];
+	gs2GradientStopsA[1] = gs2GradientStops[1];
+	ThreadSafe_End();
 }
